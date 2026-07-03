@@ -1,0 +1,102 @@
+# compounding-system: v1 — installed from claude_tools; do not hand-edit; run /compounding upgrade
+#
+# Auto-merge for compounding-queue-only PRs.
+#
+# Why: autonomous sessions (the daily compounding-drain, status-hygiene passes, headless agents on
+# push-restricted surfaces) must be able to land queue entries and status flips on the default
+# branch with zero per-item operator action — while everything else keeps normal review. This
+# workflow is that pre-approval expressed as explicit, auditable repo policy: a PR into the default
+# branch whose diff touches ONLY the allowed paths below is squash-merged automatically.
+#
+# TRUST BOUNDARY: every path added to ALLOWED merges WITHOUT review. The default is the compounding
+# queue only (append-mostly markdown, no runtime surface). Add repo-specific append-only journal
+# paths deliberately and one at a time.
+#
+# Scope guard: EVERY changed file — including a rename's OLD path, so moving a file into the queue
+# from elsewhere doesn't qualify — must be inside the allowed set. One file outside (code, skills,
+# workflows, CLAUDE.md, …) and the PR is left alone for normal review; the decision is logged either
+# way, and a skipped PR is a green no-op, not a red X.
+#
+# No CI wait, by design: the allowed paths are markdown with no runtime surface; if the repo has CI
+# it still runs on the PR itself. The merge uses GITHUB_TOKEN, which does NOT trigger push-to-main
+# workflows (GitHub's anti-recursion rule) — fine for docs-only diffs.
+#
+# Requires: repo Actions setting "Workflow permissions" allowing read/write (or the permissions
+# block below being honored), and squash merges enabled.
+
+name: auto-merge-journal
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  merge:
+    # Same-repo, non-draft PRs into the default branch only. Fork PRs get a read-only token, so
+    # they could never merge anyway — the guard just makes that explicit.
+    if: >
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.base.ref == github.event.repository.default_branch &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Path-guard and squash-merge
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const ALLOWED = [
+              /^docs\/compounding\//,
+              // Add repo-specific append-only journal paths here DELIBERATELY — every added
+              // path widens what merges without review.
+            ];
+            const pr = context.payload.pull_request;
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              per_page: 100,
+            });
+            if (files.length === 0) {
+              core.info('Empty diff — not auto-merging.');
+              return;
+            }
+            const inScope = (p) => ALLOWED.some((re) => re.test(p));
+            const outside = [...new Set(
+              files
+                .flatMap((f) => [f.filename, f.previous_filename].filter(Boolean))
+                .filter((p) => !inScope(p)),
+            )];
+            if (outside.length > 0) {
+              core.info(
+                `Not queue-only — leaving PR #${pr.number} for normal review. ` +
+                `Out-of-scope path(s): ${outside.join(', ')}`,
+              );
+              return;
+            }
+            core.info(
+              `PR #${pr.number} touches only allowed queue paths (${files.length} file(s)) — squash-merging.`,
+            );
+            // A failure here (merge conflict, branch protection, perms) throws and fails the
+            // job — visible, instead of silently stranding the entry.
+            await github.rest.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              merge_method: 'squash',
+            });
+            // "Automatically delete head branches" does NOT fire on a github-actions[bot] API
+            // merge — delete explicitly. Already-gone is fine.
+            try {
+              await github.rest.git.deleteRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `heads/${pr.head.ref}`,
+              });
+              core.info(`Merged; deleted head branch ${pr.head.ref}.`);
+            } catch (e) {
+              core.info(`Merged; head branch cleanup skipped (${e.message}).`);
+            }
