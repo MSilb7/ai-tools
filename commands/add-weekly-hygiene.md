@@ -51,6 +51,7 @@ You are the weekly repo-hygiene agent for <REPO> (github.com/<SLUG>)<ROLE_NOTE>.
 GOAL: sweep this ONE repo for cleanup + improvements, auto-apply only safe/obvious fixes on a new branch, and open ONE PR with the full punch-list for human review. NEVER merge.
 
 STEPS:
+0. ENV CHECK — if `git rev-parse --is-inside-work-tree` fails or `<SLUG>`'s expected paths are absent, this environment has NO repo attached: do NOT probe the filesystem or search for credentials (it trips credential classifiers); STOP and alert the operator "Environment misconfigured — attach <SLUG> as this routine's repository source at claude.ai; cannot run until then." (This routine sets `session_context.sources` at create so this should never fire — if it does, the env lost its source and the run would otherwise silently no-op.)
 1. `git fetch origin && git checkout <BRANCH> && git pull --ff-only`. <DOCS_NOTE>
 2. SCAN across five dimensions; prioritized punch-list, each item tagged [OBVIOUS-FIX] (low-risk, mechanical) or [PROPOSE] (judgment/risky/bigger) with file:line + effort S/M/L. Focus: <FOCUS>.
    (a) Dead code / duplication / simplification.
@@ -110,14 +111,22 @@ Periodically verify the existing weekly-hygiene routines are still CORRECT, not 
 2. **Stack/gate drift** — re-detect the stack (Step 1). If it changed (e.g. bun→pnpm, a new `typecheck` script, Python test runner change), the embedded gate command is now wrong → update it.
 3. **Template drift** — compare the routine's prompt to the current template in this skill (Step 5). If the skill's template has improved since the routine was created, the routine is stale → re-render and update.
 4. **Safety-surface drift** — re-assess the risk surface (Step 1/3). If the repo gained a live/signing/order-placement seam not covered by the routine's HARD CONSTRAINTS, that's the highest-severity finding → tighten the constraints.
-5. **Health** — `enabled` true? `last_fired_at` recent (fired on schedule)? cron sane and not colliding with another routine's minute? inert env MCP connectors present (known, low priority — see gotchas)?
+5. **Health** — `enabled` true? `last_fired_at` recent (fired on schedule)? cron sane and not colliding with another routine's minute? inert env MCP connectors present (known, low priority — see gotchas)? **Repo-bound?** — `session_context.sources[].git_repository.url` present and non-empty; a repo-touching routine with empty `sources` boots into an empty home behind a 403 git proxy and **silently no-ops** — **highest severity, page the operator immediately** to attach the repo at claude.ai.
 6. **Coverage** — also run RECONCILE MODE (new repos missing a routine).
 7. **Compounding coverage** — a repo with no `docs/compounding/SOP.md` → propose `/compounding setup`
    for it (the self-improvement queue + Ready gate + daily auto-drain system; see
    `commands/compounding.md`). A repo WITH the system: check its installed stamps against the current
    `commands/compounding-templates/VERSION` — stale → propose `/compounding upgrade`.
 
-Output a short punch-list per routine: OK, or the specific drift + the fix. For any routine needing a prompt/gate/branch/constraint change, apply it with `RemoteTrigger` `update` resending the **full** `job_config` (partial updates drop nested fields — see gotchas). Confirm with the user before applying changes to live routines. End with a one-line "N routines OK, M updated, K repos missing coverage."
+8. **Fleet repo-less scan (ALL routines, not just hygiene).** From the same `RemoteTrigger list`, check
+   EVERY routine whose prompt reads/writes a repo — trader, scanner, thesis-watch, hygiene, etc. — for a
+   non-empty `session_context.sources[].git_repository.url`. Any repo-touching routine with empty `sources`
+   is booting repo-less and **silently failing**; page the operator to attach its repo at claude.ai. This is
+   the global backstop for routines created from the desktop/web app (which cannot set `sources`) — run it
+   after any non-CLI routine creation, not just on the weekly sweep. (Skip pure broker/API-read probes that
+   legitimately touch no repo.)
+
+Output a short punch-list per routine: OK, or the specific drift + the fix. For any routine needing a prompt/gate/branch/constraint change, apply it with `RemoteTrigger` `update` resending the **full** `job_config` (partial updates drop nested fields — see gotchas). Confirm with the user before applying changes to live routines. End with a one-line "N routines OK, M updated, K repos missing coverage, R repo-less (PAGE)."
 
 ## Gotchas (verified 2026-06-28)
 
