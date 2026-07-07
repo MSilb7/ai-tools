@@ -1,4 +1,4 @@
-<!-- compounding-system: v2 — installed from claude_tools; do not hand-edit; run /compounding upgrade -->
+<!-- compounding-system: v3 — installed from claude_tools; do not hand-edit; run /compounding upgrade -->
 # Compounding SOP — Continuously-Discovered Improvements
 
 Any session — scheduled routine, build agent, research thread — that encounters something worth
@@ -10,6 +10,33 @@ once an item's acceptance criteria are firm.
 (`.claude/commands/compounding-drain.md`), and the auto-merge workflow are installed and upgraded by
 the global `/compounding` skill (`github.com/MSilb7/claude_tools`). The reference implementation
 lives in `MSilb7/investment-agent` (which uses a native TypeScript selector — behavior is identical).
+
+---
+
+## The system's skills (and the naming convention)
+
+Every command that belongs to the compounding system is namespaced under **`compounding`** — that is
+the convention, and it is load-bearing: the shared prefix is how a session, a routine, or a fresh
+agent knows a command is part of this one system (and what to `/compounding upgrade` together).
+
+**Naming convention (applies to any system, not just this one):** a command that belongs to a system
+carries the `<system>-<verb>` prefix; the **bare `<system>`** command is the system's root (an
+installer / multiplexer with modes). Follow this when you add a command to a system — a new
+compounding command is `compounding-<verb>`, never a bare verb that hides its membership. Do NOT
+prefix a command that merely *touches* the system's artifacts but belongs to a broader concern (e.g. a
+general "capture a learning" skill that writes to several destinations is not `compounding-capture` —
+prefixing it would falsely claim system membership).
+
+| Command | What it is | When a session/agent/routine uses it |
+|---|---|---|
+| `/compounding` | Root skill — `setup` / `upgrade` / `status` modes | Install the system in a repo; sync a repo to the latest templates; one-off status |
+| `/compounding-drain` | The daily worker — drains ONE eligible item to a PR | The daily drain routine fire, or on demand ("work the next improvement item") |
+| `/compounding-curate` | Context-lifecycle pass — dedup / compress / promote / retire the always-on context | The weekly hygiene routine, or on demand when CLAUDE.md / standing practices have grown heavy |
+| `compounding-status` | The selector — derives each item's state (ELIGIBLE / IN-PROGRESS / …) | Session start (surface OPEN items); the drain's STEP 1; `/compounding status` |
+| *capture* (inline) | Writing a `docs/compounding/YYYY-MM-DD-HHMM.md` entry | Any session that hits something fixable — see "When to write" below (no command; it's a plain file write) |
+
+New to the system? Read this table, then "When to write" (how to file), the "Item format" (the
+contract), and "Validating a fix" (how a fix is proven). Those four are the whole operating manual.
 
 ---
 

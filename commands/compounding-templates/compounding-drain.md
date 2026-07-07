@@ -9,7 +9,7 @@ description: >
   an item that is operator-action, Ready:no, above the effort ceiling, or already claimed.
 ---
 
-<!-- compounding-system: v2 — installed from claude_tools; do not hand-edit; run /compounding upgrade -->
+<!-- compounding-system: v3 — installed from claude_tools; do not hand-edit; run /compounding upgrade -->
 
 # compounding-drain — work one queue item to done
 

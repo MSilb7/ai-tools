@@ -1,4 +1,4 @@
-// compounding-system: v2 — installed from claude_tools; do not hand-edit; run /compounding upgrade
+// compounding-system: v3 — installed from claude_tools; do not hand-edit; run /compounding upgrade
 //
 // Machine-readable compounding-queue status. Parses docs/compounding/*.md items and derives each
 // item's coordination state from GitHub branch/PR refs: git ls-remote on compounding/* claim
