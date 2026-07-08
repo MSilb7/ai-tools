@@ -35,7 +35,8 @@ cat "$TPL/VERSION"                                       # must print a number
 If the symlink doesn't resolve (e.g. cloud session without the claude_tools checkout), fetch each
 template raw from `https://raw.githubusercontent.com/MSilb7/claude_tools/main/commands/compounding-templates/<file>`
 (files: `VERSION`, `SOP.md`, `compounding-status.mjs`, `compounding-status.test.mjs`,
-`auto-merge-journal.yml`, `compounding-drain.md`, `compounding-curate.md`, `claude-md-snippet.md`).
+`auto-merge-journal.yml`, `compounding-drain.md`, `compounding-curate.md`, `claude-md-snippet.md`,
+`PRD-template.md`, `prd-reconcile.md`, `prd-claude-md-snippet.md`).
 
 ## 1 — Detect (validate, don't guess — same discipline as /add-weekly-hygiene)
 
@@ -62,12 +63,21 @@ and say so):
      pass — run by the weekly hygiene routine and on demand; keeps the always-on context from rotting).
 4. CLAUDE.md: append the bullet from `$TPL/claude-md-snippet.md` (create CLAUDE.md containing a
    `# CLAUDE.md — <repo>` header + the bullet if the file is absent).
-5. GitHub repos only: `.github/workflows/auto-merge-journal.yml` ← `$TPL/auto-merge-journal.yml`.
+5. **Product PRD (the second pillar — the living product north star):**
+   - `.claude/commands/prd-reconcile.md` ← `$TPL/prd-reconcile.md` (the desired-vs-reality pass).
+   - `docs/product/PRD.md` ← `$TPL/PRD-template.md` **ONLY IF ABSENT** — an existing PRD is NEVER overwritten
+     (the skeleton is a starting point; the filled-in content is the repo's, not canonical-owned). Say so if you
+     skip it. Offer to seed §1 vision from the repo's README/CLAUDE.md so it isn't left empty.
+   - CLAUDE.md: also append the bullet from `$TPL/prd-claude-md-snippet.md` (the "PRD is the north star / reconcile
+     it every thread" standing practice).
+   - Advise (don't force) wiring the PRD into the repo's own `catch-up`/session-start + end-of-session-review
+     skills if they exist: read the PRD first; carry a PRD-drift check at wrap-up.
+6. GitHub repos only: `.github/workflows/auto-merge-journal.yml` ← `$TPL/auto-merge-journal.yml`.
    State the TRUST BOUNDARY in the PR body: *"PRs touching only docs/compounding/** will squash-merge
    without review once this lands; requires Actions read/write workflow permissions."*
-6. Smoke: `node scripts/compounding-status.mjs` from the repo root runs clean (`total=0` on a fresh
+7. Smoke: `node scripts/compounding-status.mjs` from the repo root runs clean (`total=0` on a fresh
    queue is correct).
-7. Open ONE PR titled `feat: compounding system v<VERSION> — queue, selector, drain worker`.
+8. Open ONE PR titled `feat: compounding system v<VERSION> — queue + drain worker + product PRD`.
    Per the merge-asks standing practice: ask permission to merge; on approval, merge and confirm
    the workflow shows up under Actions.
 
@@ -108,12 +118,15 @@ end "blocked" — degrade to a paste-ready apply pack in the PR body + file the 
 1. Resolve `$TPL` + pull (step 0). Canonical version: `cat "$TPL/VERSION"`.
 2. Read the repo's installed stamps: `grep -rn "compounding-system: v" docs/compounding/SOP.md
    scripts/compounding-status.mjs .claude/commands/compounding-drain.md
-   .claude/commands/compounding-curate.md .github/workflows/auto-merge-journal.yml CLAUDE.md 2>/dev/null`.
+   .claude/commands/compounding-curate.md .claude/commands/prd-reconcile.md
+   .github/workflows/auto-merge-journal.yml CLAUDE.md 2>/dev/null`.
 3. For each installed file whose stamp version < canonical OR whose content differs from the
    template: replace it **wholesale** on branch `compounding/upgrade-v<VERSION>` (stamped files are
    canonical-owned — hand edits to them are lost by design; improvements belong upstream, say so in
    the PR body). Preserve the repo's own queue entries untouched (`docs/compounding/*.md` session
-   files are never templates).
+   files are never templates). **NEVER wholesale-replace `docs/product/PRD.md`** — the PRD skeleton is
+   install-if-absent only; its filled-in content is the repo's, not canonical-owned. If a repo lacks a PRD
+   entirely, offer to install the skeleton (`$TPL/PRD-template.md`); if it lacks `prd-reconcile.md`, install it.
 4. Smoke (`node scripts/compounding-status.mjs`), then PR with a per-file `current → new` table.
    Ask permission to merge per the merge-asks practice (a weekly hygiene fire instead leaves the PR
    for review).

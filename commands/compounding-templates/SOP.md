@@ -1,4 +1,4 @@
-<!-- compounding-system: v3 — installed from claude_tools; do not hand-edit; run /compounding upgrade -->
+<!-- compounding-system: v5 — installed from claude_tools; do not hand-edit; run /compounding upgrade -->
 # Compounding SOP — Continuously-Discovered Improvements
 
 Any session — scheduled routine, build agent, research thread — that encounters something worth
@@ -34,6 +34,12 @@ prefixing it would falsely claim system membership).
 | `/compounding-curate` | Context-lifecycle pass — dedup / compress / promote / retire the always-on context | The weekly hygiene routine, or on demand when CLAUDE.md / standing practices have grown heavy |
 | `compounding-status` | The selector — derives each item's state (ELIGIBLE / IN-PROGRESS / …) | Session start (surface OPEN items); the drain's STEP 1; `/compounding status` |
 | *capture* (inline) | Writing a `docs/compounding/YYYY-MM-DD-HHMM.md` entry | Any session that hits something fixable — see "When to write" below (no command; it's a plain file write) |
+| `/prd-reconcile` | Reconcile the product PRD (`docs/product/PRD.md`) against reality — the north-star doc's desired-vs-actual pass | On a cadence (weekly hygiene) or on demand ("is the product doc current?") |
+
+**Two pillars.** This system maintains two living documents, both reconciled against reality every thread: the
+**improvement queue** (`docs/compounding/` — the rows above) and the **product PRD** (`docs/product/PRD.md` — the
+north star, installed by `/compounding setup`, kept current by `/prd-reconcile`). The queue captures *what to
+fix*; the PRD captures *what the product is and where it's going*.
 
 New to the system? Read this table, then "When to write" (how to file), the "Item format" (the
 contract), and "Validating a fix" (how a fix is proven). Those four are the whole operating manual.
