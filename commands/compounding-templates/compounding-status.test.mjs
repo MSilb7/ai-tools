@@ -93,6 +93,24 @@ test("parses legacy h2 em-dash headers and combined severity/effort", () => {
   assert.equal(items[1].done, true); // CLOSED-INVALID counts as done
 });
 
+test("a bolded/emphasized status keyword still registers as done (**DONE**, _RESOLVED_)", () => {
+  const md = [
+    "### [C-BOLD1] bold done",
+    "- **Status:** **DONE (2026-07-08)** — implemented",
+    "**Goal:** x",
+    "",
+    "### [C-EMPH1] underscore resolved",
+    "- **Status:** _RESOLVED_ — done",
+    "**Goal:** y",
+    "",
+    '### [C-QUOTE1] quoted closed',
+    '- **Status:** "CLOSED-INVALID" — wrong premise',
+    "**Goal:** z",
+  ].join("\n");
+  const items = parseCompoundingFile("2026-07-08-0000.md", md);
+  assert.deepEqual(items.map((i) => i.done), [true, true, true]);
+});
+
 test("parses bare headers, suffixed pickup, OPEN-with-annotation status", () => {
   const items = parseCompoundingFile("2026-06-30-2030.md", BARE_HEADER);
   assert.equal(items.length, 1);

@@ -220,6 +220,18 @@ workflow) are not repo-local: file them as a queue item with an extra line after
 - **Upstream:** claude_tools
 ```
 
+**Scope — what actually qualifies (VERIFY before you tag).** `Upstream: claude_tools` is ONLY for
+components of the compounding system that live under `claude_tools/commands/compounding-templates/`:
+this SOP, the `compounding-*` skills, the selector (`compounding-status.mjs`), the drain/curate
+protocol, `auto-merge-journal.yml`. A repo-local tool that merely gets *used* during compounding work
+— a project's own research harness, build script, or eval — is **NOT** a compounding-system component:
+fix it in its own repo and do **not** tag it `Upstream: claude_tools`. Before you add the tag (or act
+on one you find), confirm the target file exists under `compounding-templates/` — **do not infer a
+canonical claude_tools copy from the tag itself.** *(War-story, 2026-07-08: a trading repo's
+`thesis-research.js` harness fix was tagged `Upstream: claude_tools`; a later session added the
+claude_tools repo and hunted for a copy that never existed — the harness only ever lived in that one
+repo. The mis-tag cost a round-trip; the verify-first rule kills it.)*
+
 Executing an upstream item means PRing `github.com/MSilb7/claude_tools`
 (`commands/compounding-templates/` + a `VERSION` bump), after which **every** repo's next
 `/compounding upgrade` inherits the improvement. Never fork the system silently in one repo — that

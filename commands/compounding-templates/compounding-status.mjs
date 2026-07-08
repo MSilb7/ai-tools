@@ -97,7 +97,9 @@ export function parseCompoundingFile(fileName, content) {
     const status = field(line, "Status");
     if (status !== null) {
       cur.statusRaw = status;
-      cur.done = /^(DONE|RESOLVED|CLOSED)/i.test(status.trim());
+      // Tolerate leading markdown emphasis/quotes ("**DONE**", "_RESOLVED_", '"CLOSED"') — a bolded
+      // status keyword must still register as terminal (else a done item silently shows as open).
+      cur.done = /^[\s*_"'`]*(DONE|RESOLVED|CLOSED)/i.test(status.trim());
       continue;
     }
     const goal = line.match(/^\*\*Goal:\*\*\s*(.+)$/);
