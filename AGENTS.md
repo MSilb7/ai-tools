@@ -8,9 +8,10 @@ adapters.
 ## Repository layout
 
 - `skills/<name>/SKILL.md` — canonical portable skills. New reusable workflows belong here.
-- `skills/<name>/agents/openai.yaml` — optional Codex UI metadata; it must not contain workflow logic.
-- `commands/` — legacy Claude Code commands retained during migration. Do not add new shared
-  workflows here.
+- `skills/<name>/agents/openai.yaml` — required Codex UI metadata; it must not contain workflow logic.
+- `skills/<name>/references/<provider>-*.md` — provider capability adapters, read only when that
+  runtime is selected.
+- `commands/` — thin legacy Claude Code invocation wrappers. Never put reusable workflow logic here.
 - `commands/compounding-templates/` — versioned compatibility assets for repositories installed
   before lifecycle workflows became portable. New workflow logic belongs in skills.
 - `scripts/install-skills` — installs the shared skills through symlinks and refreshes compatibility
@@ -25,6 +26,9 @@ adapters.
   instead of requiring a specific question tool.
 - Put provider-specific behavior in a clearly named reference or platform adapter. Do not duplicate
   the portable workflow.
+- Portability does not mean lowest-common-denominator behavior. Keep the invariant method in
+  `SKILL.md`, then use native provider features through explicit adapters for scheduling, execution
+  isolation, connectors, permissions, models, notifications, and UI actions.
 - Keep `SKILL.md` under 500 lines. Move detailed playbooks to one-level-deep `references/`, repeatable
   deterministic work to `scripts/`, and copyable templates to `assets/`.
 - Preserve legacy command paths until their replacements are installed and verified in both Claude
@@ -42,11 +46,13 @@ The canonical lifecycle is a cooperating skill set, not a provider-specific comm
 - `catch-up` establishes read-only session context.
 - `capture-learning` routes discoveries to durable sources.
 - `end-session-review` closes documentation, validation, queue, and review loops.
+- `repository-hygiene` owns recurring maintenance, with separate automation-runtime adapters.
+- `sync-ai-tools` installs and verifies the same canonical skills for every supported agent.
 
 New repository setups must expose these behaviors through `AGENTS.md` and the shared skill layer.
 `CLAUDE.md`, Codex configuration, and other provider files may import or point to the shared layer,
-but must not become independently maintained copies. Scheduling, connector attachment, permission
-configuration, and client UI actions remain provider adapters.
+but must not become independently maintained copies. Claude Workflows, Codex scheduled tasks, and
+other native features remain first-class adapters around portable skills.
 
 ## Continuous improvement
 
@@ -70,10 +76,13 @@ After changing shared skills or installation behavior:
 2. Run `scripts/install-skills --dry-run` and inspect both Claude and Codex targets.
 3. Run `node --test scripts/install-skills.test.mjs` when changing discovery or the portable
    lifecycle set.
-4. Validate each changed skill with the available Agent Skills validator.
-5. Run `node --test commands/compounding-templates/*.test.mjs` when touching the compounding system
+4. Run `node --test scripts/portability.test.mjs` when changing provider adapters or workflow
+   placement.
+5. Confirm every top-level file under `commands/` is a thin compatibility wrapper.
+6. Validate each changed skill with the available Agent Skills validator.
+7. Run `node --test commands/compounding-templates/*.test.mjs` when touching the compounding system
    or repository-wide validation.
-6. Check `git diff` and confirm no generated cache, credentials, or unrelated user changes are
+8. Check `git diff` and confirm no generated cache, credentials, or unrelated user changes are
    included.
 
 ## Compounding queue
