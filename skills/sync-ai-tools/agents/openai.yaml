@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sync AI Tools"
+  short_description: "Install shared skills for every agent"
+  default_prompt: "Use $sync-ai-tools to install and verify the canonical AI Tools skills for supported agents."

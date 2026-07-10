@@ -1,0 +1,4 @@
+interface:
+  display_name: "Repository Hygiene"
+  short_description: "Run or schedule repository hygiene safely"
+  default_prompt: "Use $repository-hygiene to scan, run, schedule, or audit repository hygiene."

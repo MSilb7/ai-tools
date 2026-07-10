@@ -23,6 +23,8 @@ agent discovery from the checkout's local folder name.
 - `catch-up` — build a read-only current-state briefing.
 - `capture-learning` — route a discovery into the correct durable source.
 - `end-session-review` — reconcile docs, validation, queue, and review state at close.
+- `repository-hygiene` — run or schedule recurring maintenance through native runtime adapters.
+- `sync-ai-tools` — install and verify the same canonical skills for supported agents.
 
 Each canonical skill lives at `skills/<name>/SKILL.md`. Provider-specific behavior belongs in a
 reference or adapter, not in a duplicate copy of the workflow.
@@ -55,17 +57,17 @@ into `~/.claude/skills/` and `~/.agents/skills/`. During migration it also refre
 After moving or renaming the checkout, rerun the installer from its new location. The platform links
 continue to point through `~/.ai-tools`, so only the stable anchor needs to change.
 
-## Claude compatibility adapters
+## Provider capability adapters
 
-Thin command wrappers remain so existing Claude invocations resolve to the same canonical skills.
-They contain no reusable workflow logic. The remaining Claude-only workflows are:
+Every reusable method lives in a portable skill. Native features remain available through explicit,
+progressively loaded adapters; for example, `repository-hygiene` has separate references for Claude
+Workflows and Codex scheduled tasks. This preserves each runtime's repository binding, execution
+isolation, connector, permission, scheduling, notification, and UI capabilities without duplicating
+the maintenance workflow.
 
-- `add-weekly-hygiene`
-- `sync-commands`
-
-Claude Code prefers the modern skill when a skill and command share the same name. Scheduling and
-client-specific configuration stay in adapters; product, technical, and compounding behavior stays
-portable.
+Thin files under `commands/` remain only so existing Claude invocations resolve to canonical skills.
+Codex metadata under `agents/openai.yaml` is discovery metadata only. Neither surface owns workflow
+logic.
 
 ## Reorient an existing repository
 
@@ -93,6 +95,8 @@ documentation.
 - Keep tool names and model names out of the portable core.
 - Put detailed reference material in `references/`, deterministic helpers in `scripts/`, and
   copyable templates in `assets/`.
+- Put native scheduling, connector, permission, model, environment, and UI behavior in a clearly
+  named provider reference. Keep the invariant method in `SKILL.md`.
 - Run the skill validator, `scripts/install-skills --dry-run`, the cross-client installer test, and
   relevant workflow tests before committing.
 

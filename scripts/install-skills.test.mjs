@@ -40,6 +40,8 @@ test("installer exposes every portable skill to Claude and Codex", () => {
 
     assert.ok(skillNames.includes("compounding"));
     assert.ok(skillNames.includes("end-session-review"));
+    assert.ok(skillNames.includes("repository-hygiene"));
+    assert.ok(skillNames.includes("sync-ai-tools"));
 
     for (const skillName of skillNames) {
       const expected = path.join(anchor, "skills", skillName);
@@ -53,6 +55,12 @@ test("installer exposes every portable skill to Claude and Codex", () => {
     const legacyCompounding = path.join(claudeCommands, "compounding.md");
     assert.ok(fs.lstatSync(legacyCompounding).isSymbolicLink());
     assert.equal(fs.readlinkSync(legacyCompounding), path.join(anchor, "commands", "compounding.md"));
+
+    for (const commandName of ["add-weekly-hygiene.md", "sync-commands.md"]) {
+      const installed = path.join(claudeCommands, commandName);
+      assert.ok(fs.lstatSync(installed).isSymbolicLink());
+      assert.equal(fs.readlinkSync(installed), path.join(anchor, "commands", commandName));
+    }
   } finally {
     fs.rmSync(tempHome, { recursive: true, force: true });
   }

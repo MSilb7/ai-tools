@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, "..");
 const skillsRoot = path.join(repoRoot, "skills");
+const commandsRoot = path.join(repoRoot, "commands");
 const namePattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const portableCorePatterns = [
   ["Claude-only question tool", /AskUserQuestion/],
@@ -81,7 +82,9 @@ for (const skillName of skillNames) {
   }
 
   const metadataPath = path.join(skillsRoot, skillName, "agents", "openai.yaml");
-  if (fs.existsSync(metadataPath)) {
+  if (!fs.existsSync(metadataPath)) {
+    fail(errors, skillName, "missing required agents/openai.yaml metadata");
+  } else {
     const metadata = fs.readFileSync(metadataPath, "utf8");
     const shortDescription = metadata.match(/^\s*short_description:\s*"([^"]+)"\s*$/m)?.[1];
     if (!shortDescription || shortDescription.length < 25 || shortDescription.length > 64) {
@@ -93,6 +96,29 @@ for (const skillName of skillNames) {
   }
 
   console.log(`checked  ${skillName} (${lines.length} lines)`);
+}
+
+if (fs.existsSync(commandsRoot)) {
+  const commandFiles = fs
+    .readdirSync(commandsRoot, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
+    .map((entry) => entry.name)
+    .sort();
+
+  for (const commandFile of commandFiles) {
+    const command = fs.readFileSync(path.join(commandsRoot, commandFile), "utf8");
+    const lineCount = command.split(/\r?\n/).length;
+    if (!/Legacy Claude command wrapper for the portable/.test(command)) {
+      fail(errors, `commands/${commandFile}`, "top-level Claude commands must be portable-skill wrappers");
+    }
+    if (!/~\/\.ai-tools\/skills\/[a-z0-9-]+\/SKILL\.md/.test(command)) {
+      fail(errors, `commands/${commandFile}`, "wrapper must point to a canonical portable skill");
+    }
+    if (lineCount > 12) {
+      fail(errors, `commands/${commandFile}`, `wrapper is ${lineCount} lines; workflow logic belongs in skills`);
+    }
+    console.log(`checked  commands/${commandFile} (${lineCount} lines)`);
+  }
 }
 
 if (errors.length > 0) {
