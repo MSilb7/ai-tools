@@ -104,6 +104,28 @@ install_anchor() {
   replace_link "$repo_root" "$anchor"
 }
 
+# Remove symlinks that point through the anchor but whose targets no longer exist (a skill or
+# command was renamed or removed). Never touches real files or links owned by anything else.
+prune_stale_links() {
+  local destination_root="$1"
+  local entry
+  local link_target
+
+  [[ -d "$destination_root" ]] || return 0
+  for entry in "$destination_root"/* "$destination_root"/.*; do
+    [[ -L "$entry" ]] || continue
+    link_target="$(readlink "$entry")"
+    [[ "$link_target" == "$anchor"/* ]] || continue
+    [[ ! -e "$entry" ]] || continue
+    if $dry_run; then
+      printf '[dry-run] prune %s (dangling -> %s)\n' "$entry" "$link_target"
+    else
+      rm "$entry"
+      printf 'pruned   %s (dangling -> %s)\n' "$entry" "$link_target"
+    fi
+  done
+}
+
 install_target() {
   local label="$1"
   local destination_root="$2"
@@ -147,9 +169,12 @@ status=0
 if [[ "$target" == "all" || "$target" == "claude" ]]; then
   install_target "Claude Code" "$claude_dir" || status=1
   install_legacy_claude_commands || status=1
+  prune_stale_links "$claude_dir"
+  prune_stale_links "$claude_commands_dir"
 fi
 if [[ "$target" == "all" || "$target" == "codex" ]]; then
   install_target "Codex" "$codex_dir" || status=1
+  prune_stale_links "$codex_dir"
 fi
 
 if [[ "$status" -eq 0 ]]; then

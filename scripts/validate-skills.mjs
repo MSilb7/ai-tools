@@ -17,9 +17,36 @@ const portableCorePatterns = [
   ["legacy Claude command path", /(?:~\/)?\.claude\/commands/],
   ["legacy repository name", /claude_tools/],
   ["pinned Claude model", /claude-(?:sonnet|opus|haiku)/i],
+  ["pinned OpenAI model", /gpt-\d/i],
   ["undeclared Superpowers dependency", /superpowers:/],
-  ["skill scaffold placeholder", /\[TODO:/],
 ];
+// Applies to SKILL.md only — copyable templates under assets/ may legitimately carry TODO markers.
+const scaffoldPlaceholderPattern = ["skill scaffold placeholder", /\[TODO:/];
+// Provider capability adapters are the one place provider coupling is allowed. They must be
+// named for their provider so readers (and this validator) know what they are.
+const providerReferencePattern = /^(?:claude|codex|openai|anthropic|gemini|cursor|copilot)-[a-z0-9-]+\.md$/;
+
+function portableFilesToScan(skillDir) {
+  const files = [];
+  const walk = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        if (path.relative(skillDir, fullPath) === "agents") continue;
+        walk(fullPath);
+        continue;
+      }
+      if (!entry.name.endsWith(".md")) continue;
+      const relative = path.relative(skillDir, fullPath);
+      if (relative.startsWith(`references${path.sep}`) && providerReferencePattern.test(entry.name)) {
+        continue;
+      }
+      files.push(relative);
+    }
+  };
+  walk(skillDir);
+  return files.sort();
+}
 
 function fail(errors, skillName, message) {
   errors.push(`${skillName}: ${message}`);
@@ -75,23 +102,36 @@ for (const skillName of skillNames) {
     fail(errors, skillName, `SKILL.md is ${lines.length} lines; keep it under 500`);
   }
 
-  for (const [label, pattern] of portableCorePatterns) {
-    if (pattern.test(content)) {
-      fail(errors, skillName, `contains ${label}`);
+  const [scaffoldLabel, scaffoldPattern] = scaffoldPlaceholderPattern;
+  if (scaffoldPattern.test(content)) {
+    fail(errors, skillName, `contains ${scaffoldLabel}`);
+  }
+
+  const skillDir = path.join(skillsRoot, skillName);
+  for (const relativeFile of portableFilesToScan(skillDir)) {
+    const fileContent = fs.readFileSync(path.join(skillDir, relativeFile), "utf8");
+    for (const [label, pattern] of portableCorePatterns) {
+      if (pattern.test(fileContent)) {
+        fail(errors, skillName, `${relativeFile} contains ${label}`);
+      }
     }
   }
 
-  const metadataPath = path.join(skillsRoot, skillName, "agents", "openai.yaml");
+  const metadataPath = path.join(skillDir, "agents", "openai.yaml");
   if (!fs.existsSync(metadataPath)) {
     fail(errors, skillName, "missing required agents/openai.yaml metadata");
   } else {
     const metadata = fs.readFileSync(metadataPath, "utf8");
+    const metadataLines = metadata.split(/\r?\n/).length;
     const shortDescription = metadata.match(/^\s*short_description:\s*"([^"]+)"\s*$/m)?.[1];
     if (!shortDescription || shortDescription.length < 25 || shortDescription.length > 64) {
       fail(errors, skillName, "agents/openai.yaml short_description must be a quoted 25-64 character string");
     }
     if (!metadata.includes(`$${skillName}`)) {
       fail(errors, skillName, "agents/openai.yaml default_prompt must mention the skill explicitly");
+    }
+    if (metadataLines > 10) {
+      fail(errors, skillName, `agents/openai.yaml is ${metadataLines} lines; it is discovery metadata, not a workflow surface`);
     }
   }
 

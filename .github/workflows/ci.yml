@@ -1,0 +1,25 @@
+# CI for the portability contract. AGENTS.md's verification list is the source of truth; this
+# workflow runs its mechanical steps on every PR so the contract is enforced, not honor-system.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate portable skills and command wrappers
+        run: node scripts/validate-skills.mjs
+      - name: Preview installer links for both targets
+        run: scripts/install-skills --dry-run
+      - name: Installer and portability tests
+        run: node --test scripts/install-skills.test.mjs scripts/portability.test.mjs
+      - name: Compounding template tests
+        run: node --test commands/compounding-templates/*.test.mjs
