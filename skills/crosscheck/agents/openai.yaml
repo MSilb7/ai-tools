@@ -1,0 +1,4 @@
+interface:
+  display_name: "Crosscheck"
+  short_description: "Cross-model double-check notes between agents"
+  default_prompt: "Use $crosscheck to file or pick up cross-model double-check notes in this repository."

@@ -18,6 +18,7 @@ agent discovery from the checkout's local folder name.
 - `compounding` — set up, upgrade, or inspect the repository improvement system.
 - `compounding-drain` — work one ready queue item through proof and review.
 - `compounding-curate` — keep standing agent context concise and correctly routed.
+- `crosscheck` — set up and run cross-model double-check notes between agent families.
 - `prd-reconcile` — align confirmed product direction and shipped reality.
 - `maintain-technical-design` — maintain the repository's concise implementation map.
 - `catch-up` — build a read-only current-state briefing.
