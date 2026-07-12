@@ -41,6 +41,9 @@ The canonical lifecycle is a cooperating skill set, not a provider-specific comm
 - `compounding` installs, upgrades, or inspects the repository system.
 - `compounding-drain` works one ready improvement safely.
 - `compounding-curate` keeps standing context lean and correctly routed.
+- `crosscheck` runs the cross-model double-check loop: one model family files evidence-shaped
+  notes (no self-assessment, runnable verification, do-not-relitigate) for the other to verify
+  with validated-then-applied findings.
 - `prd-reconcile` keeps confirmed product direction aligned with reality.
 - `maintain-technical-design` keeps the implementation map current.
 - `catch-up` establishes read-only session context.
