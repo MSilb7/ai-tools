@@ -11,7 +11,7 @@ Symlink every portable skill in this repository into the selected agent runtimes
 Environment overrides:
   AI_TOOLS_HOME      Stable repository anchor (default: $HOME/.ai-tools)
   CLAUDE_SKILLS_DIR  Claude Code skill directory (default: $HOME/.claude/skills)
-  CLAUDE_COMMANDS_DIR  Legacy Claude command directory (default: $HOME/.claude/commands)
+  CLAUDE_COMMANDS_DIR  Retired Claude command-link prune directory (default: $HOME/.claude/commands)
   CODEX_SKILLS_DIR   Codex skill directory (default: $HOME/.agents/skills)
 EOF
 }
@@ -145,30 +145,11 @@ install_target() {
   fi
 }
 
-install_legacy_claude_commands() {
-  local command_file
-  local command_name
-  local failures=0
-
-  make_dir "$claude_commands_dir"
-  for command_file in "$repo_root"/commands/*.md; do
-    [[ -f "$command_file" ]] || continue
-    command_name="$(basename "$command_file")"
-    replace_link "$anchor/commands/$command_name" "$claude_commands_dir/$command_name" || failures=1
-  done
-
-  if [[ "$failures" -ne 0 ]]; then
-    echo "install-skills: legacy Claude commands completed with conflicts" >&2
-    return 1
-  fi
-}
-
 install_anchor
 
 status=0
 if [[ "$target" == "all" || "$target" == "claude" ]]; then
   install_target "Claude Code" "$claude_dir" || status=1
-  install_legacy_claude_commands || status=1
   prune_stale_links "$claude_dir"
   prune_stale_links "$claude_commands_dir"
 fi

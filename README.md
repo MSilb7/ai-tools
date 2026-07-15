@@ -52,8 +52,9 @@ scripts/install-skills --target codex
 ```
 
 The installer creates a stable `~/.ai-tools` link to this checkout, then links skill directories
-into `~/.claude/skills/` and `~/.agents/skills/`. During migration it also refreshes the existing
-`~/.claude/commands/` links. It updates symlinks but never overwrites real files or directories.
+into `~/.claude/skills/` and `~/.agents/skills/`. For Claude Code it also prunes retired AI Tools
+links from `~/.claude/commands/`; it does not install legacy command wrappers. It updates symlinks
+but never overwrites real files or directories.
 
 Codex user-scope discovery at `~/.agents/skills/` was verified on 2026-07-14 with Codex CLI
 0.133.0 in a Codex Desktop session: the native skill catalog listed the installed lifecycle skills,
@@ -71,9 +72,10 @@ Workflows and Codex scheduled tasks. This preserves each runtime's repository bi
 isolation, connector, permission, scheduling, notification, and UI capabilities without duplicating
 the maintenance workflow.
 
-Thin files under `commands/` remain only so existing Claude invocations resolve to canonical skills.
-Codex metadata under `agents/openai.yaml` is discovery metadata only. Neither surface owns workflow
-logic.
+Top-level `commands/*.md` wrappers were retired after native lifecycle-skill invocation was verified
+in Claude Code 2.1.206 and Codex CLI 0.133.0. The versioned `commands/compounding-templates/`
+compatibility pack remains for older repository installations. Codex metadata under
+`agents/openai.yaml` is discovery metadata only; it does not own workflow logic.
 
 ## Reorient an existing repository
 

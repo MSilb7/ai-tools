@@ -11,7 +11,7 @@ const repoRoot = path.resolve(scriptDir, "..");
 const installer = path.join(scriptDir, "install-skills");
 const skillsRoot = path.join(repoRoot, "skills");
 
-test("installer exposes every portable skill to Claude and Codex", () => {
+test("installer exposes every portable skill and prunes retired Claude commands", () => {
   const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "ai-tools-install-"));
   const anchor = path.join(tempHome, ".ai-tools");
   const claudeSkills = path.join(tempHome, ".claude", "skills");
@@ -21,15 +21,18 @@ test("installer exposes every portable skill to Claude and Codex", () => {
   // Pre-seed stale state a rename/removal would leave behind, plus entries the installer
   // must never touch: a dangling link pointing outside the anchor, and a real file.
   fs.mkdirSync(claudeSkills, { recursive: true });
+  fs.mkdirSync(claudeCommands, { recursive: true });
   fs.mkdirSync(codexSkills, { recursive: true });
   const staleClaudeLink = path.join(claudeSkills, "renamed-away-skill");
   const staleCodexLink = path.join(codexSkills, "renamed-away-skill");
   const foreignDanglingLink = path.join(claudeSkills, "someone-elses-link");
   const realFile = path.join(claudeSkills, "not-a-symlink.md");
+  const retiredCommandLink = path.join(claudeCommands, "compounding.md");
   fs.symlinkSync(path.join(anchor, "skills", "renamed-away-skill"), staleClaudeLink);
   fs.symlinkSync(path.join(anchor, "skills", "renamed-away-skill"), staleCodexLink);
   fs.symlinkSync(path.join(tempHome, "does-not-exist"), foreignDanglingLink);
   fs.writeFileSync(realFile, "keep me\n");
+  fs.symlinkSync(path.join(anchor, "commands", "compounding.md"), retiredCommandLink);
 
   try {
     execFileSync(installer, ["--target", "all"], {
@@ -65,21 +68,13 @@ test("installer exposes every portable skill to Claude and Codex", () => {
       }
     }
 
-    const legacyCompounding = path.join(claudeCommands, "compounding.md");
-    assert.ok(fs.lstatSync(legacyCompounding).isSymbolicLink());
-    assert.equal(fs.readlinkSync(legacyCompounding), path.join(anchor, "commands", "compounding.md"));
-
-    for (const commandName of ["add-weekly-hygiene.md", "sync-commands.md"]) {
-      const installed = path.join(claudeCommands, commandName);
-      assert.ok(fs.lstatSync(installed).isSymbolicLink());
-      assert.equal(fs.readlinkSync(installed), path.join(anchor, "commands", commandName));
-    }
-
     // Dangling anchor links are pruned in every target; everything else is preserved.
     assert.equal(fs.lstatSync(staleClaudeLink, { throwIfNoEntry: false }), undefined);
     assert.equal(fs.lstatSync(staleCodexLink, { throwIfNoEntry: false }), undefined);
     assert.ok(fs.lstatSync(foreignDanglingLink).isSymbolicLink(), "non-anchor link must survive prune");
     assert.equal(fs.readFileSync(realFile, "utf8"), "keep me\n");
+    assert.equal(fs.lstatSync(retiredCommandLink, { throwIfNoEntry: false }), undefined);
+    assert.deepEqual(fs.readdirSync(claudeCommands), []);
   } finally {
     fs.rmSync(tempHome, { recursive: true, force: true });
   }

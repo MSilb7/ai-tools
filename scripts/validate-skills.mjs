@@ -146,18 +146,7 @@ if (fs.existsSync(commandsRoot)) {
     .sort();
 
   for (const commandFile of commandFiles) {
-    const command = fs.readFileSync(path.join(commandsRoot, commandFile), "utf8");
-    const lineCount = command.split(/\r?\n/).length;
-    if (!/Legacy Claude command wrapper for the portable/.test(command)) {
-      fail(errors, `commands/${commandFile}`, "top-level Claude commands must be portable-skill wrappers");
-    }
-    if (!/~\/\.ai-tools\/skills\/[a-z0-9-]+\/SKILL\.md/.test(command)) {
-      fail(errors, `commands/${commandFile}`, "wrapper must point to a canonical portable skill");
-    }
-    if (lineCount > 12) {
-      fail(errors, `commands/${commandFile}`, `wrapper is ${lineCount} lines; workflow logic belongs in skills`);
-    }
-    console.log(`checked  commands/${commandFile} (${lineCount} lines)`);
+    fail(errors, `commands/${commandFile}`, "top-level legacy commands are retired; use a portable skill");
   }
 }
 
