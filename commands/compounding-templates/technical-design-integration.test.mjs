@@ -6,7 +6,6 @@ import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "../..");
-const command = fs.readFileSync(path.join(root, "commands/compounding.md"), "utf8");
 const compoundingSkill = fs.readFileSync(path.join(root, "skills/compounding/SKILL.md"), "utf8");
 const skill = fs.readFileSync(path.join(root, "skills/maintain-technical-design/SKILL.md"), "utf8");
 const assetPath = path.join(
@@ -91,10 +90,11 @@ test("setup installs shared cross-agent maintenance rules", () => {
   assert.ok(continuousSnippet.split(/\r?\n/).length <= 12);
 });
 
-test("the legacy Claude command is only a compatibility wrapper", () => {
-  assert.match(command, /Legacy Claude command wrapper for the portable compounding skill/);
-  assert.match(command, /skills\/compounding\/SKILL\.md/);
-  assert.ok(command.split(/\r?\n/).length <= 10);
+test("top-level Claude command wrappers are retired", () => {
+  const commandFiles = fs
+    .readdirSync(path.join(root, "commands"), { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".md"));
+  assert.deepEqual(commandFiles, []);
 });
 
 test("product reconciliation captures confirmed planning decisions", () => {

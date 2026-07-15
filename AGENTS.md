@@ -11,7 +11,6 @@ adapters.
 - `skills/<name>/agents/openai.yaml` — required Codex UI metadata; it must not contain workflow logic.
 - `skills/<name>/references/<provider>-*.md` — provider capability adapters, read only when that
   runtime is selected.
-- `commands/` — thin legacy Claude Code invocation wrappers. Never put reusable workflow logic here.
 - `commands/compounding-templates/` — versioned compatibility assets for repositories installed
   before lifecycle workflows became portable. New workflow logic belongs in skills.
 - `scripts/install-skills` — installs the shared skills through symlinks and refreshes compatibility
@@ -31,8 +30,9 @@ adapters.
   isolation, connectors, permissions, models, notifications, and UI actions.
 - Keep `SKILL.md` under 500 lines. Move detailed playbooks to one-level-deep `references/`, repeatable
   deterministic work to `scripts/`, and copyable templates to `assets/`.
-- Preserve legacy command paths until their replacements are installed and verified in both Claude
-  Code and Codex.
+- Do not reintroduce top-level `commands/*.md` wrappers. Native lifecycle-skill discovery was
+  verified in Claude Code and Codex before those wrappers were retired; only the versioned
+  `commands/compounding-templates/` compatibility subtree remains.
 
 ## Portable repository lifecycle
 
@@ -84,7 +84,7 @@ After changing shared skills or installation behavior:
    lifecycle set.
 4. Run `node --test scripts/portability.test.mjs` when changing provider adapters or workflow
    placement.
-5. Confirm every top-level file under `commands/` is a thin compatibility wrapper.
+5. Confirm no top-level files under `commands/` have reappeared; only compatibility subtrees remain.
 6. Validate each changed skill with the available Agent Skills validator.
 7. Run `node --test commands/compounding-templates/*.test.mjs` when touching the compounding system
    or repository-wide validation.

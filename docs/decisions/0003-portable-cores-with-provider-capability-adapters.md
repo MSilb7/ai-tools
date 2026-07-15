@@ -17,8 +17,9 @@ feature may have an adapter in that skill's `references/` directory when it tran
 native discovery, scheduling, connector, permission, model, environment, or UI behavior.
 
 Provider adapters may name native tools and configuration. They must not redefine or duplicate the
-invariant method. Top-level Claude commands remain thin invocation wrappers only. Codex UI metadata
-remains descriptive only.
+invariant method. Temporary provider invocation wrappers may exist only for a versioned migration;
+AI Tools' top-level Claude wrappers were retired after native lifecycle-skill discovery was verified
+in both daily-driver runtimes. Codex UI metadata remains descriptive only.
 
 `repository-hygiene` now owns the portable maintenance method, with separate Claude Workflows and
 Codex scheduled-task adapters. `sync-ai-tools` owns cross-client installation and parity checks.
@@ -30,5 +31,5 @@ for new workflow behavior. They can be retired only through a versioned consumer
 
 - All live reusable AI Tools workflows are discoverable as portable skills.
 - Each client can use its stronger native features without contaminating the shared core.
-- Validation can reject new top-level command bodies and missing Codex metadata.
+- Validation rejects reintroduced top-level command files and missing Codex metadata.
 - Provider adapters need separate verification whenever their native runtime changes.
