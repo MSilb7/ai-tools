@@ -9,7 +9,7 @@ description: >
 argument-hint: "[since <git-ref or date> — default: the PRD's last-reconciled marker]"
 ---
 
-<!-- compounding-system: v7 — installed from claude_tools; do not hand-edit; run /compounding upgrade -->
+<!-- compounding-system: v8 — installed from claude_tools; do not hand-edit; run /compounding upgrade -->
 
 # /prd-reconcile — keep the product north star current (desired-state vs reality)
 

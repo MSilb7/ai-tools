@@ -61,6 +61,12 @@ Use the canonical template pack for stamped queue infrastructure. A template sta
 canonical-owned is upgraded upstream and replaced as a unit; repository queue entries are never
 templates.
 
+The drain may process at most three eligible items per run, one claim and implementation at a
+time. A non-operator item may declare `Ready-when` only for a machine-checkable repository or review
+gate with already-firm acceptance criteria. The drain records dated evidence when that gate passes,
+reruns the selector, and never treats credentials, production state, third-party state, trigger
+state, or an operator decision as an autonomous readiness gate.
+
 Do not install or refresh legacy provider command copies when the portable lifecycle skills are
 available. Preserve an existing repository's legacy copies until its migration is reviewed, then
 replace their standing instructions with concise pointers rather than another workflow body.
@@ -87,6 +93,8 @@ drift that requires judgment, propose it and ask one focused question instead of
 ## 5. Verify and hand off
 
 - Run the selector and the repository's relevant tests.
+- Confirm the selector exposes any declared `Ready-when` value and that the portable drain applies
+  the bounded, one-at-a-time loop.
 - Validate links, scripts, and installed skill references.
 - Review the diff for lost repository content, duplicate workflow bodies, credentials, and unrelated
   changes.

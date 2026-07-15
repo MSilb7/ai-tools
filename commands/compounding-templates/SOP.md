@@ -1,13 +1,13 @@
-<!-- compounding-system: v7 — installed from claude_tools; do not hand-edit; run /compounding upgrade -->
+<!-- compounding-system: v8 — installed from claude_tools; do not hand-edit; run /compounding upgrade -->
 # Compounding SOP — Continuously-Discovered Improvements
 
 Any session — scheduled routine, build agent, research thread — that encounters something worth
 fixing writes a scoped entry here. The goal is a structured queue that any agent can surface to the
-operator ("I see 3 OPEN items — want to tackle any?"), that a daily worker can drain autonomously
+operator ("I see 3 OPEN items — want to tackle any?"), that a bounded worker can drain autonomously
 once an item's acceptance criteria are firm.
 
-*Canonical system:* this SOP, the selector (`scripts/compounding-status.mjs`), the drain worker
-(`.claude/commands/compounding-drain.md`), and the auto-merge workflow are installed and upgraded by
+*Canonical system:* this SOP, the selector (`scripts/compounding-status.mjs`), the portable
+`compounding-drain` skill, and the auto-merge workflow are installed and upgraded by
 the global `/compounding` skill (`github.com/MSilb7/claude_tools`). The reference implementation
 lives in `MSilb7/investment-agent` (which uses a native TypeScript selector — behavior is identical).
 
@@ -30,7 +30,7 @@ prefixing it would falsely claim system membership).
 | Command | What it is | When a session/agent/routine uses it |
 |---|---|---|
 | `/compounding` | Root skill — `setup` / `upgrade` / `status` modes | Install the system in a repo; sync a repo to the latest templates; one-off status |
-| `/compounding-drain` | The daily worker — drains ONE eligible item to a PR | The daily drain routine fire, or on demand ("work the next improvement item") |
+| `/compounding-drain` | The bounded worker — drains up to three eligible items, one at a time | On the repository-approved cadence, or on demand ("work the next improvement items") |
 | `/compounding-curate` | Context-lifecycle pass — dedup / compress / promote / retire the always-on context | The weekly hygiene routine, or on demand when AGENTS.md / standing practices have grown heavy |
 | `compounding-status` | The selector — derives each item's state (ELIGIBLE / IN-PROGRESS / …) | Session start (surface OPEN items); the drain's STEP 1; `/compounding status` |
 | *capture* (inline) | Writing a `docs/compounding/YYYY-MM-DD-HHMM.md` entry | Any session that hits something fixable — see "When to write" below (no command; it's a plain file write) |
@@ -94,6 +94,7 @@ will refine them in conversation before execution begins.
 - **Effort:** low | medium | high
 - **Pickup:** active-agent | cleanup-routine | operator-action
 - **Ready:** yes | no
+- **Ready-when:** optional machine-checkable repository/review gate
 - **Files:** path(s) to touch (omit if not yet known)
 - **Status:** OPEN | DONE (PR #N / commit sha)
 
@@ -121,6 +122,12 @@ done with no conversation. **Default `no`.** Flipping to `yes` is a deliberate a
 a scoping session with operator sign-off) confirms the AC first. Only `Ready: yes` items are
 auto-drain eligible.
 
+`Ready-when` is optional and may appear only when the AC are already firm but execution depends on a
+machine-checkable condition in repository or review state, such as a merged PR or a generated file
+on the default branch. The drain may verify that condition, flip `Ready` to yes, and record dated
+evidence in the same queue-only change. Gates must not depend on credentials, production or
+third-party state, trigger state, or an operator decision; `operator-action` items never use them.
+
 ---
 
 ## Pickup protocol
@@ -138,7 +145,7 @@ conversation first: *"C3's AC are rough — want me to scope it fully before we 
 
 **Status currency is continuous, not wrap-up-driven**: flip a status **in the same PR/session as the
 change that made it true** — never park it for an end-of-session sweep the operator may never ask
-for. Backstop: the daily drain's STEP 1.5 status-hygiene pass flips any OPEN item whose referenced
+for. Backstop: the drain's STEP 1.5 status-hygiene pass flips any OPEN item whose referenced
 PR merged and corrects git-contradicted status prose. State the selector can't verify from git
 (external systems, live configs) is updated same-PR by whichever session touches that system.
 
@@ -211,16 +218,23 @@ branch/PR state, so it can't go stale on the default branch:
 
 ---
 
-## Auto-drain (the daily worker)
+## Auto-drain (bounded scheduled worker)
 
-A daily `compounding-drain` routine (skill: `.claude/commands/compounding-drain.md`) picks the single
-top-ranked ELIGIBLE item using the selector's ranking (see `compounding-status.mjs`), claims it by pushing branch
-`compounding/<key>` (an empty claim commit + a draft PR — the branch push is the atomic mutex; if the
-push is rejected the item is taken, move on), implements to the item's AC, runs the repo's
-green-check, flips the item to `DONE (PR #N)` in the same diff, and:
+A routine using the portable `compounding-drain` skill first reconciles
+git-verifiable statuses and admissible `Ready-when` gates, then drains up to **three** eligible items
+one at a time. Per item it uses the selector's ranking (see `compounding-status.mjs`), claims branch
+`compounding/<key>` with an empty commit + draft PR as the atomic mutex, implements to the AC, runs
+the green-check, flips the item to `DONE (PR #N)` in the same diff, and:
+
 - diff touches ONLY `docs/compounding/**` → marks the PR ready and the `auto-merge-journal`
   workflow lands it;
 - anything else (code, skills, workflows) → leaves a **draft PR** for human merge.
+
+After each item reaches its review state, the worker returns to a fresh default branch and re-runs
+the selector. It stops when the queue is dry, three items have been handled, or safe progress needs
+an operator. The repository owns cadence: align runs to when eligibility changes; twice daily may be
+appropriate for a repository with two meaningful eligibility windows. Scheduling remains a provider
+adapter concern rather than part of this portable workflow.
 
 Zero ELIGIBLE items ⇒ clean no-op. The worker never merges code, never touches credentials/secrets
 or money-moving/state-mutating systems, never force-pushes, never deletes branches, never pushes the

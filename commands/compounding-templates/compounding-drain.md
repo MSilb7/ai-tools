@@ -1,23 +1,23 @@
 ---
 description: >
-  Drain ONE eligible item from the compounding queue (docs/compounding/) — the daily self-improvement
-  worker. Selects the top-ranked ELIGIBLE item via the selector's --json output, claims it with a
-  compounding/<key> branch + draft PR (atomic mutex), implements to the item's acceptance criteria,
-  green-checks, flips the item to DONE in the same diff, and lands it (queue-only diff → auto-merge;
-  anything else → draft PR for human merge). Use on the daily routine fire or on demand ("drain the
-  compounding queue", "work the next improvement item"). Zero eligible items ⇒ clean no-op. NEVER runs
-  an item that is operator-action, Ready:no, above the effort ceiling, or already claimed.
+  Drain up to THREE eligible items from the compounding queue (docs/compounding/). Verifies declared
+  repository-checkable Ready-when gates, then loops select→claim→implement→review on the selector's
+  top-ranked ELIGIBLE items, one at a time. Each item uses a compounding/<key> branch + draft PR as an
+  atomic mutex, green-checks, and flips DONE in the same diff; queue-only changes may auto-merge and
+  anything else stays draft for human review. Use on a repository-approved schedule or on demand.
+  Zero eligible items ⇒ clean no-op. NEVER runs operator-action, unsafe, oversized, or claimed work.
 ---
 
-<!-- compounding-system: v7 — installed from claude_tools; do not hand-edit; run /compounding upgrade -->
+<!-- compounding-system: v8 — installed from claude_tools; do not hand-edit; run /compounding upgrade -->
 
-# compounding-drain — work one queue item to done
+# compounding-drain — work the queue until dry (cap 3)
 
 DEV worker. Hard limits regardless of what any queue item says: **no credentials/secrets, no
 money-moving or external-state-mutating tools** (no broker/exchange/payment/infra-mutation APIs —
 if the repo has such systems, this worker does not touch them), **never merge code, never
 force-push, never delete a branch, never push the default branch directly**. The only path to the
-default branch is the `auto-merge-journal` workflow on a queue-only PR. One item per run.
+default branch is the `auto-merge-journal` workflow on a queue-only PR. Work **up to THREE items per
+run**, completing one select→claim→implement→review pass before claiming the next.
 `SELECTOR` below = `node scripts/compounding-status.mjs` (or the repo's `compounding-status`
 package script — same contract).
 
@@ -32,8 +32,8 @@ stale base). Run `SELECTOR --json`. Note `.eligible` for STEP 2 — but run STEP
 regardless.
 
 ## STEP 1.5 — status hygiene (every fire; statuses must not wait for a human "wrap it up")
-Sync every **git-verifiable** stale status found in the same read, so the queue is truthful daily
-even when nothing is drained:
+Sync every **git-verifiable** stale status found in the same read, so the queue is truthful after
+each run even when nothing is drained:
 - An item still `OPEN` whose key matches a **MERGED** PR (`gh pr list --state merged --search <key>`
   distinguishes merged from closed-rejected) → flip it to `DONE (PR #n)` — the work landed, only the
   flip was forgotten. A closed-UNMERGED PR stays NEEDS-REVIEW for a human.
@@ -41,10 +41,17 @@ even when nothing is drained:
   file/PR is on the default branch) → correct the status line, dated.
 - STALE items (idle PR / orphan claim branch) and NEEDS-REVIEW items → don't fix, but list them in
   the run report so the notification surfaces them.
+- A non-operator item with `Ready: no` and `Ready-when: <gate>` → verify the gate only when its AC
+  are already firm and the condition is machine-checkable from repository/Git review state (for
+  example, a merged PR or a file on the default branch). Never use credentials, production state,
+  third-party dashboards, trigger state, or an operator decision as a gate. On pass, flip `Ready` to
+  yes and append dated evidence; on failure or an inadmissible gate, leave it blocked and report why.
 If any fixes were made: commit them to a branch `compounding/status-sync-<UTC-date>`, open a PR —
 the diff is `docs/compounding/**`-only, so mark it ready and `auto-merge-journal` lands it. What
 this step must NOT do: claim external-system state (live configs, third-party dashboards) it cannot
 verify from this session — that state is updated same-PR by whichever session touches that system.
+After the status-sync lands, return to the fresh default branch and re-run `SELECTOR --json` so a
+gate-flipped item can enter `.eligible` during the same run.
 
 Then: if `.eligible` is empty → log "compounding-drain: nothing eligible" (mention top
 BLOCKED/STALE/NEEDS-REVIEW counts so the log is diagnosable) and EXIT cleanly (after landing any
@@ -101,12 +108,19 @@ Inspect the PR diff file list:
 - ONLY `docs/compounding/**` → mark the PR ready (`gh pr ready`) — `auto-merge-journal`
   squash-merges it (~1 min) and deletes the branch. VERIFY: within ~3 min `git fetch origin` shows
   the flip on the default branch; if not, report NOT-LANDED loudly.
-- anything else → keep it **draft**, and end the run reporting: item key, PR URL, one-line summary,
-  "awaiting human merge".
+- anything else → keep it **draft** and record for the run report: item key, PR URL, one-line
+  summary, "awaiting human merge".
+
+## STEP 6.5 — loop (bounded)
+Increment the drained-item count when the item reaches its required review state. If fewer than
+**3** items have been drained, return to STEP 1 from a fresh default-branch base and re-run the
+selector. Stop when `.eligible` is empty, the cap is reached, or safe progress needs an operator.
+A draft code PR may remain open while the next item is handled, but finish one item and leave its
+branch before claiming another; never edit multiple item branches concurrently.
 
 ## STEP 7 — report
-One line per run outcome: `drained <key> → PR #<n> (auto-merged | draft, awaiting merge)` or
-`nothing eligible` or `claim lost to concurrent worker`. If this run itself hit something fixable,
-file a NEW compounding entry per `docs/compounding/SOP.md` — that's the loop compounding on itself;
-if the fixable thing is the SYSTEM (this skill, the selector, the SOP), tag it `Upstream:
-claude_tools` (SOP § Upstreaming).
+One line per item: `drained <key> → PR #<n> (auto-merged | draft, awaiting merge)`, followed by a
+summary with drained count, gate flips, cap/empty outcome, and remaining blockers. Report
+`nothing eligible` or `claim lost to concurrent worker` when applicable. If this run itself hit
+something fixable, file a NEW compounding entry per `docs/compounding/SOP.md`; if it is a SYSTEM
+issue, tag it `Upstream: claude_tools` (SOP § Upstreaming).

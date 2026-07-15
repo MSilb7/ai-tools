@@ -16,7 +16,7 @@ agent discovery from the checkout's local folder name.
 - `migrate-agent-config` — audit and generalize an existing repository's AI-agent setup.
 - `promote-skill` — move a proven project-local workflow into the canonical skill repository.
 - `compounding` — set up, upgrade, or inspect the repository improvement system.
-- `compounding-drain` — work one ready queue item through proof and review.
+- `compounding-drain` — work up to three ready queue items through proof and review, one at a time.
 - `compounding-curate` — keep standing agent context concise and correctly routed.
 - `crosscheck` — set up and run cross-model double-check notes between agent families.
 - `prd-reconcile` — align confirmed product direction and shipped reality.

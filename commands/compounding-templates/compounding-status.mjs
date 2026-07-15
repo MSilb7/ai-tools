@@ -1,4 +1,4 @@
-// compounding-system: v7 — installed from claude_tools; do not hand-edit; run /compounding upgrade
+// compounding-system: v8 — installed from claude_tools; do not hand-edit; run /compounding upgrade
 //
 // Machine-readable compounding-queue status. Parses docs/compounding/*.md items and derives each
 // item's coordination state from GitHub branch/PR refs: git ls-remote on compounding/* claim
@@ -69,6 +69,7 @@ export function parseCompoundingFile(fileName, content) {
         effort: "unknown",
         pickup: "unknown",
         ready: false,
+        readyWhen: null,
         statusRaw: "",
         done: false,
         goal: null,
@@ -94,6 +95,8 @@ export function parseCompoundingFile(fileName, content) {
     if (pick !== null) { cur.pickup = normPickup(pick); continue; }
     const ready = field(line, "Ready");
     if (ready !== null) { cur.ready = ready.trim().toLowerCase().startsWith("yes"); continue; }
+    const readyWhen = field(line, "Ready-when");
+    if (readyWhen !== null) { cur.readyWhen = readyWhen; continue; }
     const status = field(line, "Status");
     if (status !== null) {
       cur.statusRaw = status;
