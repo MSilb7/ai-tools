@@ -33,6 +33,8 @@ test("sync workflow verifies shared skills while preserving provider discovery",
   const command = read("commands/sync-commands.md");
 
   assert.match(core, /every portable skill link must point through the stable AI Tools anchor/);
+  assert.match(core, /Filesystem parity is necessary but not sufficient/);
+  assert.match(core, /native skill list or an\s+explicit invocation/);
   assert.match(core, /Claude and Codex discover the same portable skill set/);
   assert.match(core, /scheduling, connectors, permissions, models, and UI actions remain explicit adapters/);
   assert.match(command, /skills\/sync-ai-tools\/SKILL\.md/);

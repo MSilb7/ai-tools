@@ -55,6 +55,11 @@ The installer creates a stable `~/.ai-tools` link to this checkout, then links s
 into `~/.claude/skills/` and `~/.agents/skills/`. During migration it also refreshes the existing
 `~/.claude/commands/` links. It updates symlinks but never overwrites real files or directories.
 
+Codex user-scope discovery at `~/.agents/skills/` was verified on 2026-07-14 with Codex CLI
+0.133.0 in a Codex Desktop session: the native skill catalog listed the installed lifecycle skills,
+including `$catch-up`, after `scripts/install-skills --target codex`. This matches the current
+[Codex skill-location documentation](https://learn.chatgpt.com/docs/build-skills.md#where-to-save-skills).
+
 After moving or renaming the checkout, rerun the installer from its new location. The platform links
 continue to point through `~/.ai-tools`, so only the stable anchor needs to change.
 

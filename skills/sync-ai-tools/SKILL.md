@@ -38,6 +38,8 @@ wrappers into a second source of workflow logic.
 Enumerate canonical skill packages and confirm each requested agent has a resolving link to every
 package. Validate that:
 
+- Filesystem parity is necessary but not sufficient: use each runtime's native skill list or an
+  explicit invocation to confirm it actually discovers the lifecycle skills;
 - Claude and Codex discover the same portable skill set;
 - provider-specific command wrappers remain thin pointers;
 - provider metadata contains no workflow body;
