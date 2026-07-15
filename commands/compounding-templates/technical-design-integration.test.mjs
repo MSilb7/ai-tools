@@ -126,3 +126,10 @@ test("all canonical-owned legacy templates carry the v8 stamp", () => {
     /compounding-system: v7/,
   );
 });
+
+test("the installed queue-only workflow matches its canonical template", () => {
+  assert.equal(
+    fs.readFileSync(path.join(root, ".github/workflows/auto-merge-journal.yml"), "utf8"),
+    fs.readFileSync(path.join(here, "auto-merge-journal.yml"), "utf8"),
+  );
+});

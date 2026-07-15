@@ -44,6 +44,15 @@ test("top-level legacy command wrappers stay retired", () => {
   assert.deepEqual(commandFiles, []);
 });
 
+test("repository-local Claude command copies do not shadow portable skills", () => {
+  const commandDir = path.join(root, ".claude", "commands");
+  const commandFiles = fs.existsSync(commandDir)
+    ? fs.readdirSync(commandDir).filter((entry) => entry.endsWith(".md"))
+    : [];
+
+  assert.deepEqual(commandFiles, []);
+});
+
 test("portable compounding drain has bounded looping and repository-verifiable readiness gates", () => {
   const drain = read("skills/compounding-drain/SKILL.md");
 
