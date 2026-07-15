@@ -1,5 +1,12 @@
 # /compounding Skill Implementation Plan
 
+> **Status: COMPLETED.** This plan shipped as the `/compounding` skill + template pack (originally v1,
+> now v6) and was later superseded by the portable-skills migration — the live system is the
+> `compounding`, `compounding-drain`, `compounding-curate`, `prd-reconcile`, and
+> `maintain-technical-design` skills under `skills/`, backed by `commands/compounding-templates/` and
+> this repo's own self-hosted `docs/compounding/`. Kept as a historical record; the checkboxes below
+> reflect the plan as originally scoped and are not live-tracked.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build the `/compounding` skill + template pack in claude_tools per `docs/superpowers/specs/2026-07-03-compounding-skill-design.md`, integrate with add-weekly-hygiene, migrate investment-agent to the canonical system, and live-validate by bootstrapping a second repo.
