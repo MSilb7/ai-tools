@@ -24,7 +24,7 @@ const continuousSnippet = fs.readFileSync(
 );
 
 test("portable setup resolves the technical-design asset without duplicating it in the legacy pack", () => {
-  assert.equal(fs.readFileSync(path.join(here, "VERSION"), "utf8").trim(), "6");
+  assert.equal(fs.readFileSync(path.join(here, "VERSION"), "utf8").trim(), "7");
   assert.match(compoundingSkill, /technical-index asset lives with\s+`maintain-technical-design`/i);
   assert.match(compoundingSkill, /A maintained `docs\/technical\/TECHNICAL_DESIGN\.md` only when absent/);
   assert.equal(fs.existsSync(path.join(here, "TECHNICAL_DESIGN-template.md")), false);
@@ -104,7 +104,7 @@ test("product reconciliation captures confirmed planning decisions", () => {
   assert.match(prdReconcile, /Confirmed operator decisions in the current discovery or planning thread/);
 });
 
-test("all canonical-owned legacy templates carry the v6 stamp", () => {
+test("all canonical-owned legacy templates carry the v7 stamp", () => {
   const stamped = [
     "PRD-template.md",
     "SOP.md",
@@ -119,10 +119,10 @@ test("all canonical-owned legacy templates carry the v6 stamp", () => {
     "technical-design-agent-snippet.md",
   ];
   for (const file of stamped) {
-    assert.match(fs.readFileSync(path.join(here, file), "utf8"), /compounding-system: v6/);
+    assert.match(fs.readFileSync(path.join(here, file), "utf8"), /compounding-system: v7/);
   }
   assert.doesNotMatch(
     stamped.map((file) => fs.readFileSync(path.join(here, file), "utf8")).join("\n"),
-    /compounding-system: v5/,
+    /compounding-system: v6/,
   );
 });

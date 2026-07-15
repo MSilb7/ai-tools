@@ -12,4 +12,4 @@
   the always-on context lean — run periodically), **`compounding-status`** (state), **`/compounding`**
   (setup/upgrade). Full surface + naming rule: SOP § The system's skills. Improvements to the system
   itself get `Upstream: claude_tools` (SOP.md § Upstreaming).
-  <!-- compounding-system: v6 — installed from claude_tools; run /compounding upgrade -->
+  <!-- compounding-system: v7 — installed from claude_tools; run /compounding upgrade -->

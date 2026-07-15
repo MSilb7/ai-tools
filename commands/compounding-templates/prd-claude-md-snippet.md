@@ -6,4 +6,4 @@
   a stated preference updates the PRD in the same PR; work that **drifts** is corrected or the PRD is consciously
   updated (logged) — never a silent divergence. Drift you can't resolve now becomes a compounding item. Surface
   the vision + open roadmap at product-work start and run **`/prd-reconcile`** on a cadence.
-  <!-- compounding-system: v6 — installed from claude_tools; run /compounding upgrade -->
+  <!-- compounding-system: v7 — installed from claude_tools; run /compounding upgrade -->

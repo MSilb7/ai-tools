@@ -9,7 +9,7 @@ description: >
 argument-hint: "[repo path — default: current repo]"
 ---
 
-<!-- compounding-system: v6 — installed from claude_tools; do not hand-edit; run /compounding upgrade -->
+<!-- compounding-system: v7 — installed from claude_tools; do not hand-edit; run /compounding upgrade -->
 
 # /compounding-curate — keep the hot context lean (context lifecycle)
 

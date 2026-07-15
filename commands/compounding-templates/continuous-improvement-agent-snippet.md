@@ -6,4 +6,4 @@
   rediscovery, move it into a repository-local skill and replace duplicated standing prose with a pointer.
   If it generalizes across repositories, use `promote-skill` to improve canonical AI Tools instead of
   vendoring a copy. Keep verified learnings in durable repository sources; memory is only a backup pointer.
-  <!-- compounding-system: v6 — installed from claude_tools; run /compounding upgrade -->
+  <!-- compounding-system: v7 — installed from claude_tools; run /compounding upgrade -->

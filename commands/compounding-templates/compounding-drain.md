@@ -9,7 +9,7 @@ description: >
   an item that is operator-action, Ready:no, above the effort ceiling, or already claimed.
 ---
 
-<!-- compounding-system: v6 — installed from claude_tools; do not hand-edit; run /compounding upgrade -->
+<!-- compounding-system: v7 — installed from claude_tools; do not hand-edit; run /compounding upgrade -->
 
 # compounding-drain — work one queue item to done
 
@@ -48,8 +48,8 @@ verify from this session — that state is updated same-PR by whichever session 
 
 Then: if `.eligible` is empty → log "compounding-drain: nothing eligible" (mention top
 BLOCKED/STALE/NEEDS-REVIEW counts so the log is diagnosable) and EXIT cleanly (after landing any
-STEP 1.5 status-sync PR). Otherwise take `.eligible[0]` (already ranked severity desc → effort asc →
-oldest first). Read its full item in `docs/compounding/<file>` — Goal + AC are the contract; the AC
+STEP 1.5 status-sync PR). Otherwise take `.eligible[0]` (already ordered by the selector's ranking
+(see `compounding-status.mjs`)). Read its full item in `docs/compounding/<file>` — Goal + AC are the contract; the AC
 define done.
 
 ## STEP 2 — claim (atomic; claim BEFORE work)

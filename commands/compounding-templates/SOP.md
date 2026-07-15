@@ -1,4 +1,4 @@
-<!-- compounding-system: v6 — installed from claude_tools; do not hand-edit; run /compounding upgrade -->
+<!-- compounding-system: v7 — installed from claude_tools; do not hand-edit; run /compounding upgrade -->
 # Compounding SOP — Continuously-Discovered Improvements
 
 Any session — scheduled routine, build agent, research thread — that encounters something worth
@@ -202,7 +202,7 @@ branch/PR state, so it can't go stale on the default branch:
 
 | State | Meaning |
 |---|---|
-| `ELIGIBLE` | OPEN + `Ready: yes` + `Pickup ∈ {active-agent, cleanup-routine}` + effort ≤ ceiling (v1: low) + unclaimed |
+| `ELIGIBLE` | OPEN + `Ready: yes` + `Pickup ∈ {active-agent, cleanup-routine}` + effort within the configured ceiling + unclaimed. Human-readable mirror of the selector: severity descending, effort ascending, oldest first; the default effort ceiling is `low` (see `compounding-status.mjs`). |
 | `IN-PROGRESS` | an open PR references the key — a thread is working it; do not pick it up |
 | `CLAIMED` | claim branch `compounding/<key>` exists; PR data unavailable on this surface — treat as in-progress |
 | `NEEDS-REVIEW` | a prior PR was closed unmerged (rejected fix) — a human decides whether to retry; never auto-retried |
@@ -214,7 +214,7 @@ branch/PR state, so it can't go stale on the default branch:
 ## Auto-drain (the daily worker)
 
 A daily `compounding-drain` routine (skill: `.claude/commands/compounding-drain.md`) picks the single
-top-ranked ELIGIBLE item (severity desc → effort asc → oldest first), claims it by pushing branch
+top-ranked ELIGIBLE item using the selector's ranking (see `compounding-status.mjs`), claims it by pushing branch
 `compounding/<key>` (an empty claim commit + a draft PR — the branch push is the atomic mutex; if the
 push is rejected the item is taken, move on), implements to the item's AC, runs the repo's
 green-check, flips the item to `DONE (PR #N)` in the same diff, and:
