@@ -73,6 +73,9 @@ other native features remain first-class adapters around portable skills.
 
 ## Verification
 
+`.github/workflows/ci.yml` runs the mechanical checks (steps 1-4 and 7) on every pull request, so
+the portability contract is enforced automatically; still run them locally before pushing.
+
 After changing shared skills or installation behavior:
 
 1. Run `node scripts/validate-skills.mjs`.
