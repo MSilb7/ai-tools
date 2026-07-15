@@ -52,3 +52,16 @@ test("portable compounding drain has bounded looping and repository-verifiable r
   assert.match(drain, /machine-checkable from repository and review state/i);
   assert.match(drain, /rerun the selector/i);
 });
+
+test("GitHub compounding reviews preserve Markdown and verify the landing base", () => {
+  const drain = read("skills/compounding-drain/SKILL.md");
+  const github = read("skills/compounding-drain/references/github-review.md");
+
+  assert.match(drain, /references\/github-review\.md/);
+  assert.match(drain, /reachable from the default branch/i);
+  assert.match(github, /structured provider connector/i);
+  assert.match(github, /--body-file/);
+  assert.match(github, /literal `\\n`/);
+  assert.match(github, /read back/i);
+  assert.match(github, /base branch is the default branch/i);
+});

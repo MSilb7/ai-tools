@@ -117,10 +117,25 @@ The portable lifecycle is implemented by `compounding`, `compounding-drain`,
 this migration. Do not add new workflow logic there or rename its legacy
 `Upstream: claude_tools` marker piecemeal.
 
-Compounding v6 installs three maintained pillars: the improvement queue, the product PRD, and a
-concise technical-design index backed by the portable `maintain-technical-design` skill. New setups
-make `AGENTS.md` the shared instruction surface, keep provider files such as `CLAUDE.md` as adapters,
-and include standing rules for clean closure and promoting repeated workflows into skills.
+The template-pack version (currently v8) is a compatibility schema for canonical-owned files copied
+into repositories; it is not a release number stamped onto portable skills. Every copied file keeps
+the same stamp because repositories may install only a subset at different paths and may skip
+several versions. That lets `compounding upgrade` distinguish replaceable upstream assets from
+repository-owned queue entries, product content, technical content, and local procedures.
+
+To update an existing repository:
+
+1. Refresh the canonical AI Tools checkout and run `scripts/install-skills` (or invoke
+   `sync-ai-tools`) so Claude Code and Codex see the latest portable skills.
+2. In the target repository, ask: `Use $compounding to upgrade this repository to the latest
+   canonical compounding system. Preserve repository-owned content and open a review for changes.`
+3. Review the per-file current-to-latest report and run the repository selector and green checks
+   before merging.
+
+Do not copy the whole compatibility directory into every project. The provider-era command bodies
+and Claude instruction snippets are retirement candidates once a downstream inventory proves no
+repository still consumes them. The repository-local SOP, selector, and optional queue-only workflow
+remain useful installation assets until a future migration replaces those responsibilities.
 
 New setup and upgrade work makes `AGENTS.md` the one shared repository instruction surface. Provider
 files import or point to it and may retain only provider-specific discovery, scheduling, connector,

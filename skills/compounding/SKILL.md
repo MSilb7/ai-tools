@@ -12,6 +12,11 @@ scheduling, permission, or connector adapters.
 Choose `setup`, `upgrade`, or `status` from the request. Default to `upgrade` when
 `docs/compounding/SOP.md` already exists and `setup` otherwise.
 
+Refreshing the installed portable skills and upgrading one repository are separate operations.
+Use `sync-ai-tools` to expose the latest canonical skill packages to each agent runtime. Then use
+`compounding upgrade` inside each target repository to reconcile its repository-local stamped
+assets and shared instructions.
+
 ## 1. Read and detect
 
 Read the target repository's instructions before changing it. Inspect:
@@ -81,6 +86,12 @@ infrastructure. Never wholesale-replace:
 - repository-specific instructions;
 - queue entries created by the repository;
 - provider-specific guidance that is not a duplicated portable workflow.
+
+The template-pack `VERSION` applies only to canonical-owned compatibility assets, not to portable
+skill packages. Downstream repositories may install only a subset of those assets at different
+paths, so retain the version stamp on every copied canonical-owned file and compare each installed
+file independently. Do not add the pack stamp to repository-owned queue entries, product content,
+technical content, or local procedures.
 
 Ensure shared lifecycle rules live once in `AGENTS.md`. Collapse duplicated provider copies to a
 pointer only when doing so preserves provider behavior. Add missing portable skill references, but

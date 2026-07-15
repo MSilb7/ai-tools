@@ -14,6 +14,12 @@ This is a development worker. Do not access secrets, move money, mutate producti
 state, weaken a validation gate, force-push, delete unmerged work, or push a protected default branch.
 If an item requires any of those actions, leave it blocked for the operator.
 
+## Provider adapters
+
+When the repository uses GitHub for review, read `references/github-review.md` before creating,
+editing, or landing a review. Keep the invariant queue method here; the adapter owns GitHub body
+transport, readback verification, and stacked-base checks.
+
 ## 1. Establish fresh state
 
 Read repository instructions and confirm `docs/compounding/` and the selector exist. Refresh remote
@@ -25,6 +31,9 @@ On every run, reconcile only git-verifiable status drift:
 - mark an open item done when its referenced work is demonstrably merged;
 - correct status prose that contradicts the default branch;
 - surface stale claims and closed-but-unmerged reviews without inventing resolution.
+
+A review is landed only when its change is reachable from the default branch. A merge into another
+feature branch does not satisfy the queue item, even when the review host labels that review merged.
 
 Land status-only repairs through the normal review path. Do not claim external state that this
 session cannot verify.
