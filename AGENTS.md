@@ -39,7 +39,7 @@ adapters.
 The canonical lifecycle is a cooperating skill set, not a provider-specific command suite:
 
 - `compounding` installs, upgrades, or inspects the repository system.
-- `compounding-drain` works one ready improvement safely.
+- `compounding-drain` works up to three ready improvements safely, one at a time.
 - `compounding-curate` keeps standing context lean and correctly routed.
 - `crosscheck` runs the cross-model double-check loop: one model family files evidence-shaped
   notes (no self-assessment, runnable verification, do-not-relitigate) for the other to verify

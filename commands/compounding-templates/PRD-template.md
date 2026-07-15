@@ -1,7 +1,7 @@
 <!-- prd: canonical product north-star. Installed by `/compounding setup` (only if docs/product/PRD.md is
      absent — an existing PRD is NEVER overwritten). Fill this in for THIS product, then KEEP IT CURRENT:
      it is desired-state, reconciled against reality every thread (see § 7). One canonical home; no forks.
-     compounding-system: v7 — the PRD skeleton is versioned; your filled-in content is yours (not overwritten
+     compounding-system: v8 — the PRD skeleton is versioned; your filled-in content is yours (not overwritten
      by /compounding upgrade). -->
 # PRD — <product name> (the product north star)
 

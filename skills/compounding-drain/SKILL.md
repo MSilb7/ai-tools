@@ -1,18 +1,24 @@
 ---
 name: compounding-drain
-description: Safely work one eligible item from a repository's compounding queue through validation and review. Use for a scheduled or on-demand queue drain, to implement the highest-ranked ready improvement, or to reconcile git-verifiable queue status without acting on blocked, operator-only, oversized, or already claimed work.
+description: Safely work up to three eligible items from a repository's compounding queue through validation and review. Use for a scheduled or on-demand queue drain, to verify repository-checkable readiness gates, implement ranked ready improvements, or reconcile git-verifiable queue status without acting on operator-only, oversized, or already claimed work.
 ---
 
 # Compounding Drain
 
-Work at most one eligible queue item per run. Treat the repository selector and the item's accepted
-criteria as the contract.
+Work at most three eligible queue items per run, one claim and implementation at a time. Treat the
+repository selector and each item's accepted criteria as the contract.
 
 ## Safety boundary
 
 This is a development worker. Do not access secrets, move money, mutate production or third-party
 state, weaken a validation gate, force-push, delete unmerged work, or push a protected default branch.
 If an item requires any of those actions, leave it blocked for the operator.
+
+## Provider adapters
+
+When the repository uses GitHub for review, read `references/github-review.md` before creating,
+editing, or landing a review. Keep the invariant queue method here; the adapter owns GitHub body
+transport, readback verification, and stacked-base checks.
 
 ## 1. Establish fresh state
 
@@ -26,18 +32,29 @@ On every run, reconcile only git-verifiable status drift:
 - correct status prose that contradicts the default branch;
 - surface stale claims and closed-but-unmerged reviews without inventing resolution.
 
+A review is landed only when its change is reachable from the default branch. A merge into another
+feature branch does not satisfy the queue item, even when the review host labels that review merged.
+
 Land status-only repairs through the normal review path. Do not claim external state that this
 session cannot verify.
 
+Also inspect non-operator items that are not ready but declare `Ready-when`. A readiness gate is
+admissible only when its acceptance criteria are already firm and the condition is
+machine-checkable from repository and review state, such as a merged review or a file present on the
+default branch.
+Never use credentials, production state, third-party dashboards, or operator-only decisions as gates.
+When a gate passes, flip `Ready` to yes and record dated evidence in a queue-only change, land it
+through the normal review path, then rerun the selector. Leave failed or inadmissible gates blocked.
+
 ## 2. Select and claim
 
-If no item is eligible, report a clean no-op with blocked and review-needed counts. Otherwise select
-the selector's highest-ranked eligible item and read its full goal, evidence, scope, and acceptance
-criteria.
+Start a drained-item count at zero. If no item is eligible, report a clean no-op with blocked and
+review-needed counts. Otherwise select the selector's highest-ranked eligible item and read its full
+goal, evidence, scope, and acceptance criteria.
 
 Claim before implementation using the repository's collision-resistant branch or review mechanism.
-If another worker already owns the claim, rerun selection and choose the next eligible item. Never
-work two items in one drain.
+If another worker already owns the claim, rerun selection and choose the next eligible item. Finish
+the selected item's implementation and review state before claiming another item.
 
 ## 3. Implement to the contract
 
@@ -63,4 +80,12 @@ When acceptance criteria pass:
 - leave code or behavior changes for human review unless the repository explicitly authorizes a
   narrower queue-only auto-merge path.
 
-Report the selected item, proof, checks, review state, status hygiene, and remaining blockers.
+Increment the drained-item count after the item reaches its required review state. If fewer than
+three items have been drained, return to a fresh default-branch base, rerun the selector, and repeat
+selection. Stop when no item remains eligible, the cap is reached, or safe progress requires an
+operator. A draft code review may remain open while the next item is handled, but never edit or claim
+multiple items concurrently.
+
+Report every selected item, proof, checks, review state, readiness/status hygiene, the cap outcome,
+and remaining blockers. Scheduling remains a provider adapter concern; repositories may choose a
+cadence aligned to when eligibility changes without changing this bounded drain method.

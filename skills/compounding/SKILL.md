@@ -12,6 +12,11 @@ scheduling, permission, or connector adapters.
 Choose `setup`, `upgrade`, or `status` from the request. Default to `upgrade` when
 `docs/compounding/SOP.md` already exists and `setup` otherwise.
 
+Refreshing the installed portable skills and upgrading one repository are separate operations.
+Use `sync-ai-tools` to expose the latest canonical skill packages to each agent runtime. Then use
+`compounding upgrade` inside each target repository to reconcile its repository-local stamped
+assets and shared instructions.
+
 ## 1. Read and detect
 
 Read the target repository's instructions before changing it. Inspect:
@@ -61,6 +66,12 @@ Use the canonical template pack for stamped queue infrastructure. A template sta
 canonical-owned is upgraded upstream and replaced as a unit; repository queue entries are never
 templates.
 
+The drain may process at most three eligible items per run, one claim and implementation at a
+time. A non-operator item may declare `Ready-when` only for a machine-checkable repository or review
+gate with already-firm acceptance criteria. The drain records dated evidence when that gate passes,
+reruns the selector, and never treats credentials, production state, third-party state, trigger
+state, or an operator decision as an autonomous readiness gate.
+
 Do not install or refresh legacy provider command copies when the portable lifecycle skills are
 available. Preserve an existing repository's legacy copies until its migration is reviewed, then
 replace their standing instructions with concise pointers rather than another workflow body.
@@ -76,6 +87,12 @@ infrastructure. Never wholesale-replace:
 - queue entries created by the repository;
 - provider-specific guidance that is not a duplicated portable workflow.
 
+The template-pack `VERSION` applies only to canonical-owned compatibility assets, not to portable
+skill packages. Downstream repositories may install only a subset of those assets at different
+paths, so retain the version stamp on every copied canonical-owned file and compare each installed
+file independently. Do not add the pack stamp to repository-owned queue entries, product content,
+technical content, or local procedures.
+
 Ensure shared lifecycle rules live once in `AGENTS.md`. Collapse duplicated provider copies to a
 pointer only when doing so preserves provider behavior. Add missing portable skill references, but
 do not require a particular agent runtime to execute the repository.
@@ -87,6 +104,8 @@ drift that requires judgment, propose it and ask one focused question instead of
 ## 5. Verify and hand off
 
 - Run the selector and the repository's relevant tests.
+- Confirm the selector exposes any declared `Ready-when` value and that the portable drain applies
+  the bounded, one-at-a-time loop.
 - Validate links, scripts, and installed skill references.
 - Review the diff for lost repository content, duplicate workflow bodies, credentials, and unrelated
   changes.

@@ -43,3 +43,34 @@ test("top-level legacy command wrappers stay retired", () => {
 
   assert.deepEqual(commandFiles, []);
 });
+
+test("repository-local Claude command copies do not shadow portable skills", () => {
+  const commandDir = path.join(root, ".claude", "commands");
+  const commandFiles = fs.existsSync(commandDir)
+    ? fs.readdirSync(commandDir).filter((entry) => entry.endsWith(".md"))
+    : [];
+
+  assert.deepEqual(commandFiles, []);
+});
+
+test("portable compounding drain has bounded looping and repository-verifiable readiness gates", () => {
+  const drain = read("skills/compounding-drain/SKILL.md");
+
+  assert.match(drain, /at most three eligible queue items per run/i);
+  assert.match(drain, /`Ready-when`/);
+  assert.match(drain, /machine-checkable from repository and review state/i);
+  assert.match(drain, /rerun the selector/i);
+});
+
+test("GitHub compounding reviews preserve Markdown and verify the landing base", () => {
+  const drain = read("skills/compounding-drain/SKILL.md");
+  const github = read("skills/compounding-drain/references/github-review.md");
+
+  assert.match(drain, /references\/github-review\.md/);
+  assert.match(drain, /reachable from the default branch/i);
+  assert.match(github, /structured provider connector/i);
+  assert.match(github, /--body-file/);
+  assert.match(github, /literal `\\n`/);
+  assert.match(github, /read back/i);
+  assert.match(github, /base branch is the default branch/i);
+});

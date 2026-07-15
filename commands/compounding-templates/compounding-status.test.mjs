@@ -18,6 +18,7 @@ const BRACKETED = `# Compounding — 2026-07-02 15:00Z
 - **Effort:** medium
 - **Pickup:** active-agent
 - **Ready:** yes
+- **Ready-when:** PR #40 is merged and the generated schema exists on main
 - **Status:** OPEN
 
 **Background:** stuff happened
@@ -73,6 +74,7 @@ test("parses bracketed h3 items with all fields", () => {
   assert.equal(a.effort, "medium");
   assert.equal(a.pickup, "active-agent");
   assert.equal(a.ready, true);
+  assert.equal(a.readyWhen, "PR #40 is merged and the generated schema exists on main");
   assert.equal(a.done, false);
   assert.equal(a.goal, "buy fills are idempotent");
   assert.equal(a.acCount, 2);
@@ -143,7 +145,7 @@ function item(over) {
   return {
     key: "20260701-0306-C-X1", id: "C-X1", title: "t", file: "2026-07-01-0306.md",
     severity: "medium", effort: "low", pickup: "active-agent", ready: true,
-    statusRaw: "OPEN", done: false, goal: "g", acCount: 1, ...over,
+    readyWhen: null, statusRaw: "OPEN", done: false, goal: "g", acCount: 1, ...over,
   };
 }
 const NOW = new Date("2026-07-02T20:00:00Z");
