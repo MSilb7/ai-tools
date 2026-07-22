@@ -27,7 +27,10 @@ def main() -> None:
         return  # malformed payload: never block the session over a reminder
 
     command = (payload.get("tool_input") or {}).get("command", "")
-    if not re.search(r"\bgh\s+pr\s+merge\b", command):
+    # Match `gh pr merge` only at a command position (line start, or after ; && || | $( ),
+    # NOT anywhere in the string — a commit message or PR body that merely *mentions*
+    # "gh pr merge" must not fire the checkpoint (first-day false positive, 2026-07-22).
+    if not re.search(r"(?:^|[;&|]\s*|\$\(\s*)gh\s+pr\s+merge\b", command, re.MULTILINE):
         return
 
     print(

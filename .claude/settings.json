@@ -7,9 +7,9 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$(git rev-parse --show-toplevel)/scripts/merge-checkpoint-hook.py\"",
+            "command": "f=\"$(git rev-parse --show-toplevel 2>/dev/null)/scripts/merge-checkpoint-hook.py\"; [ -f \"$f\" ] && python3 \"$f\" || true",
             "timeout": 10,
-            "statusMessage": "Merge checkpoint — PR merge is a natural stopping point (compound?)"
+            "statusMessage": "Merge checkpoint \u2014 PR merge is a natural stopping point (compound?)"
           }
         ]
       }
