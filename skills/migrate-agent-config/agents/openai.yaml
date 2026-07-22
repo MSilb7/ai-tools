@@ -1,4 +1,4 @@
 interface:
   display_name: "Migrate Agent Config"
   short_description: "Generalize a repository across agents"
-  default_prompt: "Use $migrate-agent-config to audit and generalize this repository’s AI-agent setup."
+  default_prompt: "Use $migrate-agent-config to audit and generalize this repository's AI-agent setup."

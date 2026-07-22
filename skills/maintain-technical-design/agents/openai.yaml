@@ -1,4 +1,4 @@
 interface:
   display_name: "Maintain Technical Design"
   short_description: "Keep technical design aligned with reality"
-  default_prompt: "Use $maintain-technical-design to create or reconcile this repository’s technical design."
+  default_prompt: "Use $maintain-technical-design to create or reconcile this repository's technical design."
