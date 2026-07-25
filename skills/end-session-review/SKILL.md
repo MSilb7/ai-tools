@@ -41,6 +41,33 @@ Check uncommitted changes, unpushed commits, open or draft reviews, stale claim 
 comments, temporary files, and instructions that now point at missing paths. Do not delete or rewrite
 work merely because its ownership is unclear.
 
+Scan **every** worktree, not just the current one — uncommitted and unmerged work hides in siblings,
+and a wrap that inspects only the active directory reports a clean tree while work sits stranded one
+path over. For each: its branch, uncommitted count, and commits not on the default branch.
+
+## 4a. Close out the session's own worktree
+
+An isolated worktree the session created is itself a loose end — leaving it behind is the worktree
+equivalent of an unpushed commit, and the user discovers it as a failure when they try to close the
+session. Decide explicitly and say which: **remove** it once its work is merged, or **keep** it and
+say what remains. Three traps make this go wrong:
+
+- **Judge "unmerged work" by commits unique to the worktree** — `git log <default-branch>..HEAD` —
+  never by a tool's own count. Removal tooling often diffs against the worktree's *creation base*, so
+  the default branch's forward progress since then (other sessions' merged work) is reported as
+  commits about to be "discarded." That number can be large and alarming while the true count is
+  zero. Verify before believing it; verify again before overriding it.
+- **A lock naming a dead process is stale.** Locks typically record an owning process; a lock whose
+  process has exited blocks cleanup while reporting the worktree as in use by a live session. Check
+  whether the process is actually alive rather than trusting the message. The session's own lock is
+  routinely the stale one, because the process that took it is the one that just ended.
+- **Never clean up a worktree that isn't yours.** A lock held by a live process, or any worktree with
+  uncommitted files or unique commits, belongs to another session — report it, leave it alone.
+
+Removing a worktree whose HEAD is already an ancestor of the default branch destroys nothing. If any
+doubt survives the checks above, keep it and hand it off — a kept worktree costs disk, a wrongly
+removed one costs work.
+
 ## 5. Route every loose end
 
 Each material follow-up must be exactly one of:
