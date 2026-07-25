@@ -16,6 +16,18 @@ adapters.
 - `scripts/install-skills` — installs the shared skills through symlinks and refreshes compatibility
   links without overwriting real files.
 
+**The installed skills are symlinks into THIS WORKING TREE, not a copied snapshot.** Every consuming
+repository therefore reads whatever is currently checked out here: an edit is live the moment it is
+saved, before any commit, and **leaving this repository on a feature branch silently changes the skills
+every other repository runs.** Two consequences worth holding onto:
+
+- **Return to `main` before you finish.** A wrap that merges a skill PR but leaves the checkout on the
+  now-deleted branch leaves consumers reading a branch. Verify with `git -C <install-source> rev-parse
+  --abbrev-ref HEAD` — the install source is wherever `~/.claude/skills/<name>` resolves to, which may be
+  a symlinked path (e.g. `~/.ai-tools` → this repo) rather than an obvious one.
+- **This is also why validation here is cheap and worth running.** There is no build or publish step to
+  catch a broken skill; the next session in an unrelated repository is the integration test.
+
 ## Cross-agent skill rules
 
 - Use lowercase hyphenated skill directory names and include only `name` and `description` in
