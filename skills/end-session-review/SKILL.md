@@ -1,11 +1,18 @@
 ---
 name: end-session-review
-description: Reconcile product, technical, operational, git, validation, and compounding state before ending substantive repository work. Use when wrapping a session, preparing a handoff, checking whether work is genuinely complete, or ensuring every loose end is completed, queued with acceptance criteria, or identified as an operator-only action. Run UNPROMPTED at any natural stopping point after substantive work — the user saying "wrapped?", "good to wrap?", "are we done?", or "all set?" IS the trigger; do not answer with a git-cleanliness check alone, and never wait for an explicit "compound this" request (capturing session learnings is part of this review, not a separate ask).
+description: Drive a work session to genuine closure — nothing left open, ready to close out — by reconciling product, technical, operational, git, validation, and compounding state. Use when wrapping a session, preparing a handoff, checking whether work is genuinely complete, or ensuring every loose end is completed, queued with acceptance criteria, or identified as an operator-only action. Run UNPROMPTED at any natural stopping point after substantive work — the user saying "wrapped?", "good to wrap?", "are we done?", or "all set?" IS the trigger; do not answer with a git-cleanliness check alone, and never wait for an explicit "compound this" request (capturing session learnings is part of this review, not a separate ask). Ends with an explicit closure assertion, so "are we good?" after a wrap report means the sweep missed something, not that the summary should be repeated.
 ---
 
 # End Session Review
 
-Close the loop on substantive work. Do not use a passing test suite as the only definition of done.
+**The goal is closure: after this review the session can be closed, and nothing is left open.** Not
+"loose ends are noted" — every one is finished, filed with acceptance criteria, or named as an
+operator-only ask. Do not use a passing test suite as the only definition of done.
+
+The review is finished when you can make the terminal assertion in § 7 and enumerate its basis. If you
+cannot, the review is still running — keep going rather than reporting a summary with residue in it.
+When the user follows a wrap report with "are we good?" or "is there more?", treat it as evidence the
+sweep was not exhaustive, not as a request to repeat the summary.
 
 ## 1. Establish current ground truth
 
@@ -28,6 +35,33 @@ Check only the surfaces affected by the work:
 
 Fix safe factual drift when the request authorizes repository changes. Surface product, architecture,
 security, or ownership decisions instead of guessing.
+
+### 2a. Sweep for what the work RETIRED — mechanically, not from memory
+
+Reasoning about "which surfaces were affected" reliably misses stale claims, because a doc you never
+opened can still instruct the reader to do something the work just made wrong. Whatever the work
+retired or replaced is a **searchable string** — so search for it across the whole repository instead
+of predicting where it appears: a removed credential or env var, a renamed identifier, a replaced
+endpoint or vendor, a deleted flag, a moved path, a superseded command.
+
+Classify **every** hit into exactly one of three, and leave none unclassified:
+
+- **a live claim or instruction** → fix it (this is the dangerous class: it tells a future reader to
+  provision a dead secret, call a removed endpoint, or trust a retired flag);
+- **a dated record** — a design spec, a historical log entry, a closed queue item → annotate as
+  superseded with a pointer to the replacement; do not rewrite history;
+- **correct as history** → leave it alone.
+
+Also check **cross-references that assert status**: a closed item's own `Ready`/`Status` header, and
+other documents that describe it as open or awaiting a decision. Those contradict reality the moment the
+work lands and are invisible to any test.
+
+### 2b. Check the OTHER entrypoints into what you changed
+
+When the work adds an output, signal, warning, or failure mode to a component, every *other* way that
+component is invoked must surface it too — aliases, back-compat wrappers, secondary CLIs, alternate
+callers. A wrapper that forwards only the success summary silently swallows a new alert, which
+reproduces the exact failure the alert was added to prevent. Enumerate the callers and verify each.
 
 ## 3. Run the real green check
 
@@ -106,3 +140,22 @@ what a compounding repository exists for.
 Lead with the outcome. Report changed sources, validation, review state, queue status, unresolved
 decisions, and the one most useful next action. Distinguish completed work from proposed or unmerged
 work.
+
+## 7. Closure gate — assert it, or keep working
+
+End with an explicit statement that the session is ready to close, and the basis for it. The answer is
+**not yet** while any of these is true — check them rather than assuming:
+
+- work committed but not merged, or a review still open, without an explicit decision to leave it so;
+- a hit from § 2a still unclassified, or a status cross-reference still contradicting reality;
+- an entrypoint from § 2b not verified;
+- a follow-up mentioned only in prose, with no queue item, owner, or acceptance criteria;
+- the session's own worktree left behind without a stated keep-or-remove decision (§ 4a);
+- learnings never swept (§ 5b has a terminal state either way — "nothing novel to compound" counts,
+  silence does not);
+- a documented check that could not run, without saying which and why.
+
+Then state plainly, in one line: **either** the session is ready to close and nothing is open, **or**
+exactly what remains and who owns it. Anything filed is not the user's problem — say so, and do not
+present a queued item as if it were an outstanding ask. If work is deliberately left open, that is a
+closed loop too, provided the decision is stated rather than implied.
