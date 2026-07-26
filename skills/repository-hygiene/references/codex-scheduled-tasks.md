@@ -17,7 +17,10 @@ environment.
    so keep the method in the skill rather than copying it into the prompt.
 6. Choose the least-privilege local environment and permissions that can inspect the repository, run
    its documented checks, push a branch, and open a review. Do not broaden permissions for unrelated
-   connectors or production systems.
+   connectors or production systems. Grant merge permission only when the operator has explicitly
+   opted this task into auto-merge per
+   `docs/decisions/0004-conditional-auto-merge-for-safe-fix-only-hygiene-runs.md`; otherwise the
+   ceiling is push-and-open-review.
 7. Read the task back and verify project, environment, prompt, cadence, enabled state, and next run.
 
 Codex scheduled tasks may run in a local project or a dedicated background worktree, and standalone

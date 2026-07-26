@@ -4,7 +4,10 @@ Invoke `$repository-hygiene` in `run` mode for the configured repository and fol
 
 Operate from a fresh default branch. Scan all five hygiene dimensions, classify findings as
 `SAFE-FIX` or `PROPOSE`, apply only safe and reversible fixes on a dedicated branch, run the
-repository's documented gate, and open one review with the full punch list. Never merge.
+repository's documented gate, and open one review with the full punch list. Merge automatically only
+if this repository has explicitly opted in and the diff is SAFE-FIX-only with a passing gate and no
+secret finding (see `docs/decisions/0004-conditional-auto-merge-for-safe-fix-only-hygiene-runs.md`);
+otherwise never merge.
 
 Honor the repository's shared agent instructions and risk-specific prohibitions. Stop loudly on a
 missing repository binding, committed secret, unavailable required gate, or attempted production,

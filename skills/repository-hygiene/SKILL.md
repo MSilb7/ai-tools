@@ -32,7 +32,8 @@ Do not add a gate command merely because it is conventional for the detected lan
 ## 2. Establish the safety envelope
 
 Always preserve unrelated work, stage exact paths, avoid history rewrites, keep changes reversible,
-and stop loudly on a committed secret or key. Never merge automatically.
+and stop loudly on a committed secret or key. Merge automatically only under the conditions in step 4
+and only when the repository's configuration explicitly opts in; otherwise never merge automatically.
 
 Add repository-specific prohibitions for live financial actions, transaction signing, production
 infrastructure, sensitive databases, credentials, or safety controls. A scheduled maintenance worker
@@ -63,8 +64,15 @@ individual maintenance fix that breaks its check and reclassify it as `PROPOSE`.
 `assets/run-prompt.md` when a headless run needs a self-contained prompt.
 
 Open one review containing the complete punch list, applied fixes, validation, and deferred proposals.
-Open a report-only issue or review when no fix is safe but the runtime supports it. Never merge the
-result from this skill.
+Open a report-only issue or review when no fix is safe but the runtime supports it.
+
+Merge the review automatically only when the repository's configuration explicitly opts into
+auto-merge for this skill (see `references/claude-workflows.md`), and only when all of: every applied
+change is `SAFE-FIX`, the gate ran and passed, and no secret or other LOUD finding occurred.
+Previously filed `PROPOSE` items carried forward as informational context do not block this — they
+are not part of the diff. Any run with a `PROPOSE` item in its own diff, a failing or unavailable
+gate, a secret finding, or no explicit opt-in stops at the review; never merge it. See
+`docs/decisions/0004-conditional-auto-merge-for-safe-fix-only-hygiene-runs.md`.
 
 ## 5. Schedule through a capability adapter
 
