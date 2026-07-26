@@ -23,3 +23,5 @@ jobs:
         run: node --test scripts/install-skills.test.mjs scripts/portability.test.mjs
       - name: Compounding template tests
         run: node --test commands/compounding-templates/*.test.mjs
+      - name: Crosscheck selector tests
+        run: node --test skills/crosscheck/scripts/crosscheck-status.test.mjs
