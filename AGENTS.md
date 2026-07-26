@@ -85,7 +85,7 @@ other native features remain first-class adapters around portable skills.
 
 ## Verification
 
-`.github/workflows/ci.yml` runs the mechanical checks (steps 1-4 and 7) on every pull request, so
+`.github/workflows/ci.yml` runs the mechanical checks (steps 1-4, 7, and 9) on every pull request, so
 the portability contract is enforced automatically; still run them locally before pushing.
 
 After changing shared skills or installation behavior:
@@ -102,6 +102,7 @@ After changing shared skills or installation behavior:
    or repository-wide validation.
 8. Check `git diff` and confirm no generated cache, credentials, or unrelated user changes are
    included.
+9. Run `node --test skills/crosscheck/scripts/crosscheck-status.test.mjs` when touching `crosscheck`.
 
 ## Compounding queue
 
