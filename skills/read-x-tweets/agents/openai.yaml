@@ -1,0 +1,4 @@
+interface:
+  display_name: "Read X Tweets"
+  short_description: "Read public X posts and threads without API keys"
+  default_prompt: "Use $read-x-tweets to read the linked X post and its full thread."
