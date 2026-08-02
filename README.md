@@ -26,6 +26,7 @@ agent discovery from the checkout's local folder name.
 - `end-session-review` — reconcile docs, validation, queue, and review state at close.
 - `repository-hygiene` — run or schedule recurring maintenance through native runtime adapters.
 - `sync-ai-tools` — install and verify the same canonical skills for supported agents.
+- `read-x-tweets` — read public X/Twitter posts, threads, and timelines without credentials.
 
 Each canonical skill lives at `skills/<name>/SKILL.md`. Provider-specific behavior belongs in a
 reference or adapter, not in a duplicate copy of the workflow.
