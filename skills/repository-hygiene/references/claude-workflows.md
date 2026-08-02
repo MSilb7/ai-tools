@@ -16,7 +16,11 @@ capability. The portable `repository-hygiene` skill owns the maintenance method.
 6. Allow only repository read/write and normal validation capabilities required by the target. Do
    not attach money-moving, signing, deployment, broker, exchange, payment, or production-mutation
    tools.
-7. Configure the expected branch/review outcome and notifications. Never configure auto-merge.
+7. Configure the expected branch/review outcome and notifications. Default to review-only (no
+   auto-merge). Only if the operator explicitly asks for it, configure this workflow's prompt to
+   auto-merge under the conditions in the skill's step 4 — SAFE-FIX-only diff, gate passed, no
+   secret finding — per `docs/decisions/0004-conditional-auto-merge-for-safe-fix-only-hygiene-runs.md`.
+   Do not enable this for a repository the operator hasn't named.
 8. Read the created workflow back and verify source, prompt, schedule, enabled state, permissions,
    connectors, and next run.
 
